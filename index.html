@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>Goal Machine v5.0</title>
+<meta name="description" content="Plug-and-play goal achievement system."/>
+<meta name="theme-color" content="#0f1a1c"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>"/>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f1a1c;--surface:#152628;--card:#1a3032;--border:#254042;--ink:#ece5d8;--dim:#8fa6a0;--rust:#c8622e;--amber:#e0a458;--green:#5e8c61;--red:#a8442f;--teal:#2a7a6e}
+html{background:var(--bg);color:var(--ink);font-family:-apple-system,'Inter','SF Pro',system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{min-height:100dvh}
+input,textarea,button{font-family:inherit}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7)}
+#root{max-width:520px;margin:0 auto;padding:0 16px 88px}
+.card{background:var(--card);border:1px solid var(--border);padding:16px;margin-bottom:12px}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px}
+.label{display:block;font-size:12px;font-weight:600;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:10px 12px;font-size:15px;outline:none;border-radius:0}
+.input:focus{border-color:var(--amber)}
+.textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:10px 12px;font-size:14px;outline:none;resize:vertical;min-height:60px;border-radius:0}
+.btn{background:var(--rust);color:#fff;border:none;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;width:100%;letter-spacing:.02em}
+.btn:disabled{opacity:.4;cursor:default}
+.btn-sec{background:transparent;color:var(--amber);border:1px solid var(--border);padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer}
+.row{display:flex;gap:8px;align-items:center}
+.spacer{height:16px}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.pill{font-size:12px;font-weight:700;padding:2px 10px;display:inline-block;border-radius:2px}
+.h1{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;flex-shrink:0}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;padding:12px 0 10px;background:transparent;border:none;color:var(--dim);font-size:11px;font-weight:500;cursor:pointer;text-align:center;border-top:2px solid transparent}
+.nav button.active{color:var(--amber);font-weight:700;border-top-color:var(--amber)}
+.nav-icon{font-size:18px;display:block;line-height:1}
+input[type="checkbox"]{width:18px;height:18px;accent-color:var(--amber);cursor:pointer}
+.stat-box{flex:1;text-align:center;padding:12px;background:var(--card);border:1px solid var(--border)}
+.stat-val{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.stat-label{font-size:11px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.stat-sub{font-size:12px;color:var(--dim);margin-top:2px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect} = React;
+const e = React.createElement;
+
+// ── Storage ──
+const SK="goal-machine-v5";
+const db={
+  load(){try{const d=localStorage.getItem(SK);return d?JSON.parse(d):null}catch{return null}},
+  save(data){try{localStorage.setItem(SK,JSON.stringify(data))}catch(e){console.error(e)}}
+};
+const today=()=>new Date().toISOString().slice(0,10);
+const daysB=(a,b)=>Math.max(0,Math.ceil((new Date(b)-new Date(a))/864e5));
+const pct=(v,t)=>t>0?Math.min(100,Math.round(v/t*100)):0;
+
+// ── SVG Charts ──
+function BarChart({data,quota,height=130}){
+  if(!data.length)return null;
+  const max=Math.max(quota,...data.map(d=>d.v))||1;
+  const w=100/data.length;
+  return(
+    <svg viewBox={`0 0 100 ${height}`} style={{width:"100%",height:height}} preserveAspectRatio="none">
+      {data.map((d,i)=>{
+        const h=(d.v/max)*(height-20);
+        const color=d.v>=quota?"#5e8c61":d.v>0?"#e0a458":"#a8442f";
+        return <g key={i}>
+          <rect x={i*w+w*.15} y={height-h} width={w*.7} height={h} fill={color} rx="1"/>
+          <text x={i*w+w/2} y={height-h-4} textAnchor="middle" fill="#8fa6a0" fontSize="6">{d.v}</text>
+        </g>;
+      })}
+      <line x1="0" y1={height-(quota/max)*(height-20)} x2="100" y2={height-(quota/max)*(height-20)} stroke="#e0a458" strokeWidth=".5" strokeDasharray="2,2"/>
+    </svg>
+  );
+}
+
+function AreaChartSVG({data,height=140}){
+  if(data.length<2)return null;
+  const vals=data.map(d=>d.v);
+  const tgts=data.map(d=>d.t);
+  const all=[...vals,...tgts];
+  const min=Math.min(...all),max=Math.max(...all)||1;
+  const range=max-min||1;
+  const px=(i)=>(i/(data.length-1))*100;
+  const py=(v)=>height-20-((v-min)/range)*(height-30);
+  const actualPath=data.map((d,i)=>`${i===0?"M":"L"}${px(i)},${py(d.v)}`).join(" ");
+  const areaPath=actualPath+` L100,${height-20} L0,${height-20} Z`;
+  const targetPath=data.map((d,i)=>`${i===0?"M":"L"}${px(i)},${py(d.t)}`).join(" ");
+  return(
+    <svg viewBox={`0 0 100 ${height}`} style={{width:"100%",height:height}} preserveAspectRatio="none">
+      <defs><linearGradient id="af" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#e0a458" stopOpacity=".3"/><stop offset="100%" stopColor="#e0a458" stopOpacity="0"/></linearGradient></defs>
+      <path d={areaPath} fill="url(#af)"/>
+      <path d={targetPath} fill="none" stroke="#254042" strokeWidth=".7" strokeDasharray="2,2"/>
+      <path d={actualPath} fill="none" stroke="#e0a458" strokeWidth="1.2"/>
+      {data.map((d,i)=><circle key={i} cx={px(i)} cy={py(d.v)} r="1.5" fill="#e0a458"/>)}
+    </svg>
+  );
+}
+
+function ProgressRing({percent,size=120,stroke=8,color="#e0a458"}){
+  const r=(size-stroke)/2,c=2*Math.PI*r,o=c-(Math.min(percent,100)/100)*c;
+  return(
+    <svg width={size} height={size} style={{transform:"rotate(-90deg)"}}>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#254042" strokeWidth={stroke}/>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeDasharray={c} strokeDashoffset={o} strokeLinecap="round" style={{transition:"stroke-dashoffset .6s"}}/>
+    </svg>
+  );
+}
+
+function GapGauge({gapPct}){
+  const phase=gapPct>60?"REBUILD":gapPct>25?"ADJUST":"FINE-TUNE";
+  const color=gapPct>60?"#a8442f":gapPct>25?"#e0a458":"#5e8c61";
+  return(
+    <div className="card">
+      <div className="row" style={{justifyContent:"space-between",marginBottom:8}}>
+        <span className="h3" style={{margin:0}}>Correction Dial</span>
+        <span className="pill" style={{color,background:color+"18"}}>{phase}</span>
+      </div>
+      <div style={{background:"var(--surface)",height:10,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",left:0,top:0,bottom:0,width:Math.min(100,Math.max(5,gapPct))+"%",background:color,transition:"width .4s"}}/>
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--dim)",marginTop:4}}>
+        <span>Fine-tune</span><span>Adjust</span><span>Rebuild</span>
+      </div>
+    </div>
+  );
+}
+
+// ━━━ SETUP ━━━
+function SetupView({config,onSave}){
+  const def={goal:"",deadline:"",metric:"",targetValue:"",currentValue:"0",dailyQuota:"",actions:[{id:1,name:""}],rules:[{signal:"",response:""}]};
+  const[f,setF]=useState(config||def);
+  const u=(k,v)=>setF(p=>({...p,[k]:v}));
+  const uA=(i,v)=>{const a=[...f.actions];a[i]={...a[i],name:v};u("actions",a)};
+  const aA=()=>u("actions",[...f.actions,{id:Date.now(),name:""}]);
+  const rA=(i)=>u("actions",f.actions.filter((_,j)=>j!==i));
+  const uR=(i,k,v)=>{const r=[...f.rules];r[i]={...r[i],[k]:v};u("rules",r)};
+  const aR=()=>u("rules",[...f.rules,{signal:"",response:""}]);
+  const rR=(i)=>u("rules",f.rules.filter((_,j)=>j!==i));
+  const ok=f.goal&&f.deadline&&f.metric&&f.targetValue&&f.dailyQuota;
+
+  return(
+    <div>
+      <div style={{padding:"32px 0 24px"}}>
+        <span className="tag" style={{color:"var(--amber)",border:"1px solid var(--border)"}}>v5.0</span>
+        <h1 className="h1" style={{fontSize:32,marginTop:10}}>Goal Machine</h1>
+        <p style={{color:"var(--dim)",marginTop:6}}>Plug in your goal. The machine handles the rest.</p>
+      </div>
+
+      <div className="card" style={{borderColor:"var(--amber)"}}>
+        <div className="tag" style={{color:"var(--bg)",background:"var(--amber)",marginBottom:10}}>Gate</div>
+        <p style={{color:"var(--dim)",fontSize:13,marginBottom:12}}>Three checks before the machine starts.</p>
+        {["Can you measure the result with a number?","Do people actually succeed doing it this way?","Is there something you can do every day that moves it forward?"].map((q,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"8px 0",borderBottom:i<2?"1px solid var(--border)":"none"}}>
+            <span className="dot" style={{background:"var(--amber)",boxShadow:"0 0 8px #e0a45888",marginTop:5}}/>
+            <span style={{fontSize:13}}>{q}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="spacer"/>
+
+      <div className="card">
+        <div className="tag" style={{color:"var(--rust)",border:"1px solid #c8622e44",marginBottom:12}}>Define Goal</div>
+        <div style={{marginBottom:14}}><label className="label">I will achieve</label><input className="input" placeholder="e.g. Lose 20 pounds" value={f.goal} onChange={e=>u("goal",e.target.value)}/></div>
+        <div style={{marginBottom:14}}><label className="label">By this date</label><input className="input" type="date" value={f.deadline} onChange={e=>u("deadline",e.target.value)}/></div>
+        <div style={{marginBottom:14}}><label className="label">Measured by</label><input className="input" placeholder="e.g. Scale weight in lbs" value={f.metric} onChange={e=>u("metric",e.target.value)}/></div>
+        <div style={{display:"flex",gap:8}}>
+          <div style={{flex:1}}><label className="label">Target</label><input className="input" type="number" placeholder="180" value={f.targetValue} onChange={e=>u("targetValue",e.target.value)}/></div>
+          <div style={{flex:1}}><label className="label">Starting</label><input className="input" type="number" placeholder="200" value={f.currentValue} onChange={e=>u("currentValue",e.target.value)}/></div>
+        </div>
+        <div style={{marginTop:14}}><label className="label">Daily quota (actions/day)</label><input className="input" type="number" placeholder="5" value={f.dailyQuota} onChange={e=>u("dailyQuota",e.target.value)}/><div style={{fontSize:12,color:"var(--dim)",marginTop:4}}>(Target ÷ rate) ÷ days × 1.2</div></div>
+      </div>
+
+      <div className="card">
+        <div className="tag" style={{color:"var(--teal)",border:"1px solid #2a7a6e44",marginBottom:12}}>Actions by Priority</div>
+        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10}}>Ranked closest-to-goal first.</p>
+        {f.actions.map((a,i)=>(
+          <div key={a.id} style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
+            <span style={{fontSize:12,fontWeight:700,color:"var(--amber)",minWidth:14}}>{i+1}</span>
+            <input className="input" style={{flex:1}} placeholder={"Action "+(i+1)} value={a.name} onChange={e=>uA(i,e.target.value)}/>
+            {f.actions.length>1&&<button onClick={()=>rA(i)} style={{background:"none",border:"none",color:"var(--red)",cursor:"pointer",fontSize:18}}>×</button>}
+          </div>
+        ))}
+        <button onClick={aA} className="btn-sec" style={{width:"100%",marginTop:4,fontSize:12}}>+ Add action</button>
+      </div>
+
+      <div className="card">
+        <div className="tag" style={{color:"var(--green)",border:"1px solid #5e8c6144",marginBottom:12}}>If-Then Rules</div>
+        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10}}>Pre-built corrections. No thinking in the loop.</p>
+        {f.rules.map((r,i)=>(
+          <div key={i} style={{marginBottom:10,padding:"8px 0",borderBottom:"1px solid var(--border)"}}>
+            <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:4}}>
+              <span style={{fontSize:11,fontWeight:700,color:"var(--amber)"}}>IF</span>
+              <input className="input" style={{flex:1,fontSize:13}} placeholder="signal..." value={r.signal} onChange={e=>uR(i,"signal",e.target.value)}/>
+              {f.rules.length>1&&<button onClick={()=>rR(i)} style={{background:"none",border:"none",color:"var(--red)",cursor:"pointer",fontSize:18}}>×</button>}
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <span style={{fontSize:11,fontWeight:700,color:"var(--green)"}}>THEN</span>
+              <input className="input" style={{flex:1,fontSize:13}} placeholder="correction..." value={r.response} onChange={e=>uR(i,"response",e.target.value)}/>
+            </div>
+          </div>
+        ))}
+        <button onClick={aR} className="btn-sec" style={{width:"100%",fontSize:12}}>+ Add rule</button>
+      </div>
+
+      <div className="spacer"/>
+      <button className="btn" disabled={!ok} onClick={()=>ok&&onSave({...f,targetValue:Number(f.targetValue),currentValue:Number(f.currentValue),dailyQuota:Number(f.dailyQuota),createdAt:today()})}>Activate Machine →</button>
+      <p style={{textAlign:"center",fontSize:11,color:"var(--dim)",marginTop:10}}>All data stays on your device.</p>
+    </div>
+  );
+}
+
+// ━━━ DASHBOARD ━━━
+function DashView({config:c,logs}){
+  const td=today(),dl=daysB(td,c.deadline),tot=Math.max(1,daysB(c.createdAt,c.deadline)),el=tot-dl;
+  const dec=Number(c.currentValue)>Number(c.targetValue);
+  const delta=Math.abs(c.targetValue-Number(c.currentValue));
+  const latest=logs.length?logs[logs.length-1].outputValue:Number(c.currentValue);
+  const prog=dec?Number(c.currentValue)-latest:latest-Number(c.currentValue);
+  const pp=pct(Math.max(0,prog),delta);
+  const rem=delta-Math.max(0,prog);
+  const rp=dl>0?(rem/dl).toFixed(1):"—";
+  const ap=el>0?(Math.max(0,prog)/el).toFixed(1):"0";
+  const gp=rp!=="—"&&Number(ap)>0?Math.max(0,100-pct(Number(ap),Number(rp))):el===0?0:80;
+  const ps=gp<=10?{l:"ON PACE",c:"#5e8c61"}:gp<=40?{l:"BEHIND",c:"#e0a458"}:{l:"OFF PACE",c:"#a8442f"};
+  const chartData=logs.map((l,i)=>({v:l.outputValue,t:dec?Number(c.currentValue)-(delta/tot*(i+1)):Number(c.currentValue)+(delta/tot*(i+1))}));
+  let streak=0;for(let i=logs.length-1;i>=0;i--){if(logs[i].actionsCompleted>=c.dailyQuota)streak++;else break;}
+
+  return(
+    <div>
+      <div style={{padding:"28px 0 20px"}}>
+        <p style={{fontSize:12,color:"var(--dim)",fontWeight:600,textTransform:"uppercase",letterSpacing:".08em"}}>Current Goal</p>
+        <h1 className="h1" style={{fontSize:24,marginTop:4}}>{c.goal}</h1>
+        <div className="row" style={{marginTop:8,flexWrap:"wrap",gap:6}}>
+          <span className="pill" style={{color:ps.c,background:ps.c+"18"}}>{ps.l}</span>
+          <span style={{fontSize:12,color:"var(--dim)"}}>{c.metric} · Due {c.deadline}</span>
+        </div>
+      </div>
+
+      <div className="card" style={{display:"flex",alignItems:"center",gap:20}}>
+        <div style={{position:"relative",flexShrink:0}}>
+          <ProgressRing percent={pp} color={ps.c}/>
+          <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+            <span style={{fontSize:28,fontWeight:800,color:ps.c}}>{pp}%</span>
+            <span style={{fontSize:11,color:"var(--dim)"}}>complete</span>
+          </div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:10,flex:1}}>
+          <div><span style={{fontSize:12,color:"var(--dim)"}}>Days left</span><br/><span style={{fontSize:20,fontWeight:700}}>{dl}</span></div>
+          <div><span style={{fontSize:12,color:"var(--dim)"}}>Streak</span><br/><span style={{fontSize:20,fontWeight:700,color:streak>=3?"var(--green)":"var(--ink)"}}>{streak} day{streak!==1?"s":""}</span></div>
+        </div>
+      </div>
+
+      <div style={{display:"flex",gap:8}}>
+        <div className="stat-box"><div className="stat-val" style={{color:ps.c}}>{ap}</div><div className="stat-label">Your pace</div><div className="stat-sub">per day</div></div>
+        <div className="stat-box"><div className="stat-val">{rp}</div><div className="stat-label">Needed</div><div className="stat-sub">per day</div></div>
+        <div className="stat-box"><div className="stat-val">{latest}</div><div className="stat-label">Current</div><div className="stat-sub">{c.metric}</div></div>
+      </div>
+
+      <GapGauge gapPct={gp}/>
+
+      {chartData.length>1&&(
+        <div className="card">
+          <span className="h3">Trend</span>
+          <div style={{marginTop:8,padding:"0 4px"}}><AreaChartSVG data={chartData}/></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--dim)",marginTop:4,padding:"0 4px"}}>
+            <span>Day 1</span><span style={{color:"var(--amber)"}}>— Actual</span><span style={{color:"#254042"}}>┄ Target</span><span>Day {chartData.length}</span>
+          </div>
+        </div>
+      )}
+
+      <div className="card">
+        <span className="h3">Action Priority Stack</span>
+        {c.actions.filter(a=>a.name).map((a,i)=>(
+          <div key={a.id} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:i<c.actions.filter(a=>a.name).length-1?"1px solid var(--border)":"none"}}>
+            <span style={{fontSize:12,fontWeight:800,color:i===0?"var(--rust)":i===1?"var(--amber)":"var(--dim)",minWidth:18}}>L{i+1}</span>
+            <span style={{fontSize:13}}>{a.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ━━━ DAILY ━━━
+function DailyView({config:c,logs,onLog}){
+  const td=today(),ex=logs.find(l=>l.date===td);
+  const[acts,setActs]=useState(()=>c.actions.filter(a=>a.name).map(a=>({...a,done:false,quality:false})));
+  const[ov,setOv]=useState(ex?.outputValue??"");
+  const[blanks,setBlanks]=useState(0);
+  const[best,setBest]=useState("");
+  const[imp,setImp]=useState("");
+  const[notes,setNotes]=useState("");
+  const[saved,setSaved]=useState(!!ex);
+  useEffect(()=>{if(ex){setOv(ex.outputValue);setBest(ex.bestAction||"");setImp(ex.improvement||"");setNotes(ex.notes||"")}},[]);
+
+  const done=acts.filter(a=>a.done&&a.quality).length;
+
+  return(
+    <div>
+      <div style={{padding:"28px 0 20px"}}>
+        <p style={{fontSize:12,color:"var(--dim)",fontWeight:600,textTransform:"uppercase",letterSpacing:".08em"}}>{new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
+        <h1 className="h1" style={{fontSize:24,marginTop:4}}>Daily Loop</h1>
+      </div>
+
+      <div className="card" style={{borderColor:done>=c.dailyQuota?"var(--green)":"var(--border)"}}>
+        <div className="row" style={{justifyContent:"space-between",marginBottom:8}}>
+          <span className="h3" style={{margin:0}}>Quota</span>
+          <span style={{fontSize:20,fontWeight:800,color:done>=c.dailyQuota?"var(--green)":"var(--amber)"}}>{done}/{c.dailyQuota}</span>
+        </div>
+        <div style={{background:"var(--surface)",height:6,overflow:"hidden"}}>
+          <div style={{height:"100%",width:pct(done,c.dailyQuota)+"%",background:done>=c.dailyQuota?"var(--green)":"var(--amber)",transition:"width .3s"}}/>
+        </div>
+      </div>
+
+      {blanks>=5&&(
+        <div className="card" style={{borderColor:"var(--red)",background:"#a8442f12"}}>
+          <div className="row"><span style={{fontSize:18}}>⚡</span><div><div style={{fontWeight:700,color:"var(--red)"}}>Circuit Breaker Tripped</div><div style={{fontSize:12,color:"var(--dim)"}}>5 blanks. Switch targets or method.</div></div></div>
+        </div>
+      )}
+
+      <div className="card">
+        <span className="h3">Actions</span>
+        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10}}>Both boxes checked = counts toward quota.</p>
+        {acts.map((a,i)=>(
+          <div key={a.id} style={{padding:"10px 0",borderTop:i>0?"1px solid var(--border)":"none"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:12,fontWeight:700,color:"var(--amber)"}}>{i+1}</span>
+              <span style={{flex:1,fontSize:14}}>{a.name}</span>
+            </div>
+            <div style={{display:"flex",gap:12,paddingLeft:24,marginTop:6}}>
+              <label style={{display:"flex",alignItems:"center",gap:6,fontSize:13,color:"var(--dim)",cursor:"pointer"}}>
+                <input type="checkbox" checked={a.done} onChange={()=>{const u=[...acts];u[i]={...u[i],done:!u[i].done};setActs(u)}}/>Did it
+              </label>
+              <label style={{display:"flex",alignItems:"center",gap:6,fontSize:13,color:"var(--dim)",cursor:"pointer"}}>
+                <input type="checkbox" checked={a.quality} disabled={!a.done} onChange={()=>{const u=[...acts];u[i]={...u[i],quality:!u[i].quality};setActs(u)}} style={{accentColor:"var(--green)"}}/>Done right
+              </label>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card">
+        <div className="row" style={{justifyContent:"space-between"}}>
+          <span className="h3" style={{margin:0}}>Consecutive Blanks</span>
+          <div className="row">
+            <button className="btn-sec" style={{padding:"4px 12px"}} onClick={()=>setBlanks(Math.max(0,blanks-1))}>−</button>
+            <span style={{fontSize:20,fontWeight:800,minWidth:28,textAlign:"center",color:blanks>=5?"var(--red)":blanks>=3?"var(--amber)":"var(--ink)"}}>{blanks}</span>
+            <button className="btn-sec" style={{padding:"4px 12px"}} onClick={()=>setBlanks(blanks+1)}>+</button>
+          </div>
+        </div>
+        <div style={{fontSize:12,color:"var(--dim)",marginTop:4}}>Zero-signal actions in a row. Reset on response.</div>
+      </div>
+
+      <div className="divider"/>
+      <div className="tag" style={{color:"var(--amber)",border:"1px solid #e0a45844",marginBottom:12}}>Save State</div>
+
+      <div style={{marginBottom:14}}><label className="label">Today's output ({c.metric})</label><input className="input" type="number" value={ov} onChange={e=>setOv(e.target.value)} placeholder="Current value"/></div>
+      <div style={{marginBottom:14}}><label className="label">Best action today?</label><input className="input" value={best} onChange={e=>setBest(e.target.value)} placeholder="Most signal"/></div>
+      <div style={{marginBottom:14}}><label className="label">One system improvement</label><input className="input" value={imp} onChange={e=>setImp(e.target.value)} placeholder="Template or rule to update"/></div>
+      <div style={{marginBottom:14}}><label className="label">Notes</label><textarea className="textarea" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Capture anything..."/></div>
+
+      <button className="btn" style={{background:saved?"var(--green)":"var(--rust)"}} onClick={()=>{
+        onLog({date:td,actionsCompleted:done,actionsTotal:acts.length,outputValue:Number(ov),bestAction:best,improvement:imp,notes,blanks});
+        setSaved(true);
+      }}>{saved?"✓ Saved — Update":"Save Today's Log"}</button>
+    </div>
+  );
+}
+
+// ━━━ HISTORY ━━━
+function HistView({config:c,logs,onReset}){
+  const bd=logs.slice(-14).map(l=>({v:l.actionsCompleted}));
+  return(
+    <div>
+      <div style={{padding:"28px 0 20px"}}>
+        <h1 className="h1" style={{fontSize:24}}>History</h1>
+        <p style={{color:"var(--dim)",fontSize:13,marginTop:4}}>{logs.length} day{logs.length!==1?"s":""} logged</p>
+      </div>
+
+      {bd.length>1&&(
+        <div className="card">
+          <span className="h3">Daily Actions (last 14d)</span>
+          <div style={{marginTop:8,padding:"0 4px"}}><BarChart data={bd} quota={c.dailyQuota}/></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--dim)",marginTop:4}}>
+            <span>Oldest</span><span style={{color:"var(--amber)"}}>┄ Quota line</span><span>Today</span>
+          </div>
+        </div>
+      )}
+
+      {c.rules?.filter(r=>r.signal).length>0&&(
+        <div className="card">
+          <span className="h3">If-Then Rules</span>
+          {c.rules.filter(r=>r.signal).map((r,i)=>(
+            <div key={i} style={{padding:"8px 0",borderBottom:"1px solid var(--border)",fontSize:13}}>
+              <span style={{color:"var(--amber)",fontWeight:700}}>IF</span> {r.signal} <span style={{color:"var(--green)",fontWeight:700}}>→</span> {r.response}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="tag" style={{color:"var(--dim)",border:"1px solid var(--border)",marginBottom:12,marginTop:8}}>Daily Logs</div>
+      {[...logs].reverse().map((l,i)=>(
+        <div key={i} className="card" style={{padding:12}}>
+          <div className="row" style={{justifyContent:"space-between",marginBottom:6}}>
+            <span style={{fontWeight:700,fontSize:13}}>{l.date}</span>
+            <span className="pill" style={{color:l.actionsCompleted>=c.dailyQuota?"#5e8c61":"#e0a458",background:(l.actionsCompleted>=c.dailyQuota?"#5e8c61":"#e0a458")+"18"}}>{l.actionsCompleted}/{l.actionsTotal}</span>
+          </div>
+          <div style={{fontSize:13,color:"var(--dim)"}}>{c.metric}: <span style={{color:"var(--ink)",fontWeight:600}}>{l.outputValue}</span>{l.bestAction&&<span> · Best: {l.bestAction}</span>}</div>
+          {l.improvement&&<div style={{fontSize:12,color:"var(--teal)",marginTop:4}}>↑ {l.improvement}</div>}
+        </div>
+      ))}
+      {!logs.length&&<p style={{color:"var(--dim)",textAlign:"center",padding:24}}>No logs yet.</p>}
+
+      <div className="divider" style={{margin:"24px 0"}}/>
+      <button className="btn-sec" style={{width:"100%",color:"var(--red)",borderColor:"#a8442f44"}} onClick={onReset}>Reset Machine (New Goal)</button>
+    </div>
+  );
+}
+
+// ━━━ APP ━━━
+function App(){
+  const[loading,setLoading]=useState(true);
+  const[config,setConfig]=useState(null);
+  const[logs,setLogs]=useState([]);
+  const[view,setView]=useState("setup");
+
+  useEffect(()=>{const d=db.load();if(d?.config){setConfig(d.config);setLogs(d.logs||[]);setView("dash")}setLoading(false)},[]);
+
+  const persist=(c,l)=>db.save({config:c,logs:l});
+  const onSetup=(c)=>{setConfig(c);setLogs([]);persist(c,[]);setView("dash")};
+  const onLog=(log)=>{const u=[...logs.filter(l=>l.date!==log.date),log].sort((a,b)=>a.date.localeCompare(b.date));setLogs(u);persist(config,u)};
+  const onReset=()=>{if(confirm("Erase current goal and all logs?")){setConfig(null);setLogs([]);setView("setup");db.save({config:null,logs:[]})}};
+
+  if(loading)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",color:"var(--dim)"}}>Loading…</div>;
+
+  return(
+    <div>
+      {!config&&<SetupView config={config} onSave={onSetup}/>}
+      {config&&view==="dash"&&<DashView config={config} logs={logs}/>}
+      {config&&view==="daily"&&<DailyView config={config} logs={logs} onLog={onLog}/>}
+      {config&&view==="history"&&<HistView config={config} logs={logs} onReset={onReset}/>}
+      {config&&(
+        <nav className="nav">
+          {[{id:"dash",l:"Dashboard",i:"◎"},{id:"daily",l:"Today",i:"↻"},{id:"history",l:"History",i:"☰"}].map(t=>(
+            <button key={t.id} className={view===t.id?"active":""} onClick={()=>setView(t.id)}>
+              <span className="nav-icon">{t.i}</span>{t.l}
+            </button>
+          ))}
+        </nav>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
