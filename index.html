@@ -136,6 +136,7 @@ function GapGauge({gapPct}){
 // ━━━ SETUP ━━━
 function SetupView({config,onSave}){
   const def={goal:"",deadline:"",metric:"",targetValue:"",currentValue:"0",dailyQuota:"",actions:[{id:1,name:""}],rules:[{signal:"",response:""}]};
+  const example={goal:"Lose 20 pounds",deadline:new Date(Date.now()+90*864e5).toISOString().slice(0,10),metric:"Scale weight (lbs)",targetValue:"180",currentValue:"200",dailyQuota:"4",actions:[{id:1,name:"Hit calorie target (under 2000)"},{id:2,name:"30 min workout"},{id:3,name:"10,000 steps"},{id:4,name:"Log all meals"}],rules:[{signal:"I miss a workout",response:"Do 15 min bodyweight session — something beats nothing"},{signal:"Weight stalls for 2 weeks",response:"Cut 200 more calories or add one extra walk per day"}]};
   const[f,setF]=useState(config||def);
   const u=(k,v)=>setF(p=>({...p,[k]:v}));
   const uA=(i,v)=>{const a=[...f.actions];a[i]={...a[i],name:v};u("actions",a)};
@@ -151,8 +152,10 @@ function SetupView({config,onSave}){
       <div style={{padding:"32px 0 24px"}}>
         <span className="tag" style={{color:"var(--amber)",border:"1px solid var(--border)"}}>v5.0</span>
         <h1 className="h1" style={{fontSize:32,marginTop:10}}>Goal Machine</h1>
-        <p style={{color:"var(--dim)",marginTop:6}}>Plug in your goal. The machine handles the rest.</p>
+        <p style={{color:"var(--dim)",marginTop:6,lineHeight:1.6}}>Most goals fail because you rely on willpower. This system replaces willpower with structure — so the right action happens daily, with instant feedback and automatic correction. Plug in any goal with a number and a deadline. The machine tells you what to do, tracks whether it's working, and fixes itself when it's not.</p>
       </div>
+
+      <button onClick={()=>setF(example)} className="btn-sec" style={{width:"100%",marginBottom:16,padding:"12px 16px",fontSize:13,borderStyle:"dashed"}}>📋 Load an example to see how it works</button>
 
       <div className="card" style={{borderColor:"var(--amber)"}}>
         <div className="tag" style={{color:"var(--bg)",background:"var(--amber)",marginBottom:10}}>Gate</div>
@@ -169,45 +172,52 @@ function SetupView({config,onSave}){
 
       <div className="card">
         <div className="tag" style={{color:"var(--rust)",border:"1px solid #c8622e44",marginBottom:12}}>Define Goal</div>
-        <div style={{marginBottom:14}}><label className="label">I will achieve</label><input className="input" placeholder="e.g. Lose 20 pounds" value={f.goal} onChange={e=>u("goal",e.target.value)}/></div>
+        <div style={{marginBottom:14}}><label className="label">I will achieve</label><input className="input" placeholder="e.g. Lose 20 lbs, Save $5K, Pass AWS exam, Run a marathon" value={f.goal} onChange={e=>u("goal",e.target.value)}/></div>
         <div style={{marginBottom:14}}><label className="label">By this date</label><input className="input" type="date" value={f.deadline} onChange={e=>u("deadline",e.target.value)}/></div>
-        <div style={{marginBottom:14}}><label className="label">Measured by</label><input className="input" placeholder="e.g. Scale weight in lbs" value={f.metric} onChange={e=>u("metric",e.target.value)}/></div>
+        <div style={{marginBottom:14}}><label className="label">How will you track progress?</label><input className="input" placeholder="e.g. Body weight on scale (lbs)" value={f.metric} onChange={e=>u("metric",e.target.value)}/><div style={{fontSize:12,color:"var(--dim)",marginTop:4}}>The one number you'll check daily to know if it's working. Examples: scale weight, bank balance, practice test score, revenue in CRM, pages written, miles run.</div></div>
         <div style={{display:"flex",gap:8}}>
-          <div style={{flex:1}}><label className="label">Target</label><input className="input" type="number" placeholder="180" value={f.targetValue} onChange={e=>u("targetValue",e.target.value)}/></div>
-          <div style={{flex:1}}><label className="label">Starting</label><input className="input" type="number" placeholder="200" value={f.currentValue} onChange={e=>u("currentValue",e.target.value)}/></div>
+          <div style={{flex:1}}><label className="label">Target number</label><input className="input" type="number" placeholder="e.g. 180" value={f.targetValue} onChange={e=>u("targetValue",e.target.value)}/></div>
+          <div style={{flex:1}}><label className="label">Where I am now</label><input className="input" type="number" placeholder="e.g. 200" value={f.currentValue} onChange={e=>u("currentValue",e.target.value)}/></div>
         </div>
-        <div style={{marginTop:14}}><label className="label">Daily quota (actions/day)</label><input className="input" type="number" placeholder="5" value={f.dailyQuota} onChange={e=>u("dailyQuota",e.target.value)}/><div style={{fontSize:12,color:"var(--dim)",marginTop:4}}>(Target ÷ rate) ÷ days × 1.2</div></div>
+        <div style={{marginTop:14}}><label className="label">How many actions per day?</label><input className="input" type="number" placeholder="e.g. 5" value={f.dailyQuota} onChange={e=>u("dailyQuota",e.target.value)}/><div style={{fontSize:12,color:"var(--dim)",marginTop:4}}>The minimum number of goal-advancing actions you'll complete each day. Not hours — actions. Examples: 5 sales calls, 3 study sessions, 4 workouts per week (1/day avg), 2 job applications. Pick a number you can hit on your worst day.</div></div>
       </div>
 
       <div className="card">
         <div className="tag" style={{color:"var(--teal)",border:"1px solid #2a7a6e44",marginBottom:12}}>Actions by Priority</div>
-        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10}}>Ranked closest-to-goal first.</p>
-        {f.actions.map((a,i)=>(
+        <p style={{fontSize:12,color:"var(--dim)",marginBottom:6}}>List the specific things you'll do each day to reach your goal — then rank them. Put the action most likely to move the needle at #1.</p>
+        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10,fontStyle:"italic"}}>Weight loss example: 1) Hit calorie target, 2) 30 min workout, 3) 10K steps. Sales example: 1) Follow up open quotes, 2) Call active buyers, 3) Prospect new accounts.</p>
+        {f.actions.map((a,i)=>{
+          const ph=["Most important daily action","Second most important","Third priority","Supporting action"];
+          return(
           <div key={a.id} style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
             <span style={{fontSize:12,fontWeight:700,color:"var(--amber)",minWidth:14}}>{i+1}</span>
-            <input className="input" style={{flex:1}} placeholder={"Action "+(i+1)} value={a.name} onChange={e=>uA(i,e.target.value)}/>
+            <input className="input" style={{flex:1}} placeholder={ph[i]||"Action "+(i+1)} value={a.name} onChange={e=>uA(i,e.target.value)}/>
             {f.actions.length>1&&<button onClick={()=>rA(i)} style={{background:"none",border:"none",color:"var(--red)",cursor:"pointer",fontSize:18}}>×</button>}
           </div>
-        ))}
+        )})}
         <button onClick={aA} className="btn-sec" style={{width:"100%",marginTop:4,fontSize:12}}>+ Add action</button>
       </div>
 
       <div className="card">
         <div className="tag" style={{color:"var(--green)",border:"1px solid #5e8c6144",marginBottom:12}}>If-Then Rules</div>
-        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10}}>Pre-built corrections. No thinking in the loop.</p>
-        {f.rules.map((r,i)=>(
+        <p style={{fontSize:12,color:"var(--dim)",marginBottom:6}}>When something goes wrong, what will you do? Write the answer now — so you don't have to think in the moment. These are your automatic corrections.</p>
+        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10,fontStyle:"italic"}}>Examples: IF I miss my calorie target → THEN I walk an extra 20 min. IF a prospect says "too expensive" → THEN I ask what it's costing them to stay the same. IF I skip a workout → THEN I do a 15 min bodyweight session instead.</p>
+        {f.rules.map((r,i)=>{
+          const sigPh=["e.g. I skip a day","e.g. I'm not seeing results after 2 weeks"];
+          const resPh=["e.g. Do a smaller version instead of nothing","e.g. Change my approach, not my effort"];
+          return(
           <div key={i} style={{marginBottom:10,padding:"8px 0",borderBottom:"1px solid var(--border)"}}>
             <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:4}}>
               <span style={{fontSize:11,fontWeight:700,color:"var(--amber)"}}>IF</span>
-              <input className="input" style={{flex:1,fontSize:13}} placeholder="signal..." value={r.signal} onChange={e=>uR(i,"signal",e.target.value)}/>
+              <input className="input" style={{flex:1,fontSize:13}} placeholder={sigPh[i]||"something goes wrong..."} value={r.signal} onChange={e=>uR(i,"signal",e.target.value)}/>
               {f.rules.length>1&&<button onClick={()=>rR(i)} style={{background:"none",border:"none",color:"var(--red)",cursor:"pointer",fontSize:18}}>×</button>}
             </div>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
               <span style={{fontSize:11,fontWeight:700,color:"var(--green)"}}>THEN</span>
-              <input className="input" style={{flex:1,fontSize:13}} placeholder="correction..." value={r.response} onChange={e=>uR(i,"response",e.target.value)}/>
+              <input className="input" style={{flex:1,fontSize:13}} placeholder={resPh[i]||"here's my fix..."} value={r.response} onChange={e=>uR(i,"response",e.target.value)}/>
             </div>
           </div>
-        ))}
+        )})}
         <button onClick={aR} className="btn-sec" style={{width:"100%",fontSize:12}}>+ Add rule</button>
       </div>
 
