@@ -4,471 +4,507 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>Goal Machine v5.0</title>
-<meta name="description" content="Plug-and-play goal achievement system."/>
-<meta name="theme-color" content="#0f1a1c"/>
+<meta name="theme-color" content="#f2f2f7"/>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◎</text></svg>"/>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f1a1c;--surface:#152628;--card:#1a3032;--border:#254042;--ink:#ece5d8;--dim:#8fa6a0;--rust:#c8622e;--amber:#e0a458;--green:#5e8c61;--red:#a8442f;--teal:#2a7a6e}
-html{background:var(--bg);color:var(--ink);font-family:-apple-system,'Inter','SF Pro',system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
-body{min-height:100dvh}
+html{
+  background:#f2f2f7;
+  color:#1c1c1e;
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',system-ui,sans-serif;
+  font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%
+}
+body{min-height:100dvh;overflow-x:hidden}
 input,textarea,button{font-family:inherit}
-input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7)}
-#root{max-width:520px;margin:0 auto;padding:0 16px 88px}
-.card{background:var(--card);border:1px solid var(--border);padding:16px;margin-bottom:12px}
-.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px}
-.label{display:block;font-size:12px;font-weight:600;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
-.input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:10px 12px;font-size:15px;outline:none;border-radius:0}
-.input:focus{border-color:var(--amber)}
-.textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:10px 12px;font-size:14px;outline:none;resize:vertical;min-height:60px;border-radius:0}
-.btn{background:var(--rust);color:#fff;border:none;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;width:100%;letter-spacing:.02em}
-.btn:disabled{opacity:.4;cursor:default}
-.btn-sec{background:transparent;color:var(--amber);border:1px solid var(--border);padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer}
+#root{max-width:500px;margin:0 auto;padding:16px 16px 88px}
+
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:10px}
+.input{
+  display:block;width:100%;height:50px;
+  background:#f2f2f7;border:none;border-radius:10px;
+  color:#1c1c1e;padding:0 14px;font-size:16px;line-height:50px;
+  outline:none;-webkit-appearance:none;appearance:none
+}
+.input:focus{box-shadow:0 0 0 2px #e8912e40}
+.input::placeholder{color:#aeaeb2}
+textarea.input{height:auto;min-height:80px;padding:12px 14px;line-height:1.4;resize:vertical}
+input[type="date"].input{height:50px;line-height:50px;min-height:50px}
+input[type="date"]::-webkit-calendar-picker-indicator{opacity:.5}
+input[type="number"].input{height:50px;line-height:50px}
+
+.btn{
+  display:block;width:100%;background:#e8912e;color:#fff;
+  border:none;border-radius:12px;height:50px;
+  font-size:16px;font-weight:600;cursor:pointer
+}
+.btn:active{opacity:.85}
+.btn:disabled{opacity:.25}
+.btn-g{background:#34c759}
+.btn-sec{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;color:#e8912e;
+  border:1px solid #d1d1d6;border-radius:10px;
+  height:44px;padding:0 16px;font-size:14px;font-weight:600;cursor:pointer
+}
+.btn-sec:active{background:#f2f2f7}
+
+.t1{font-size:28px;font-weight:700;letter-spacing:-.02em;color:#000;line-height:1.15}
+.t2{font-size:17px;font-weight:600;color:#000}
+.t3{font-size:13px;font-weight:500;color:#8e8e93}
+.t4{font-size:13px;color:#aeaeb2;line-height:1.5}
+.accent{color:#e8912e}
+
+.f{margin-bottom:16px}
 .row{display:flex;gap:8px;align-items:center}
-.spacer{height:16px}
-.divider{height:1px;background:var(--border);margin:16px 0}
-.pill{font-size:12px;font-weight:700;padding:2px 10px;display:inline-block;border-radius:2px}
-.h1{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
-.h3{font-size:15px;font-weight:700;margin-bottom:8px}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;flex-shrink:0}
-.nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.nav button{flex:1;padding:12px 0 10px;background:transparent;border:none;color:var(--dim);font-size:11px;font-weight:500;cursor:pointer;text-align:center;border-top:2px solid transparent}
-.nav button.active{color:var(--amber);font-weight:700;border-top-color:var(--amber)}
-.nav-icon{font-size:18px;display:block;line-height:1}
-input[type="checkbox"]{width:18px;height:18px;accent-color:var(--amber);cursor:pointer}
-.stat-box{flex:1;text-align:center;padding:12px;background:var(--card);border:1px solid var(--border)}
-.stat-val{font-size:22px;font-weight:800;letter-spacing:-.02em}
-.stat-label{font-size:11px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
-.stat-sub{font-size:12px;color:var(--dim);margin-top:2px}
+.sep{height:1px;background:#e5e5ea;margin:16px 0}
+.gap{height:10px}
+
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(242,242,247,.92);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid #d1d1d6;
+  display:flex;z-index:100;
+  padding:0 0 env(safe-area-inset-bottom)
+}
+.nav button{
+  flex:1;padding:8px 0 6px;background:transparent;border:none;
+  color:#8e8e93;font-size:10px;font-weight:500;cursor:pointer;text-align:center
+}
+.nav button.on{color:#e8912e}
+.ni{font-size:22px;display:block;line-height:1;margin-bottom:1px}
+
+.trk{background:#e5e5ea;height:4px;border-radius:2px;overflow:hidden}
+.trk-fill{height:100%;border-radius:2px;transition:width .3s}
+
+.sbox{flex:1;text-align:center;padding:14px 4px}
+.sv{font-size:24px;font-weight:700;letter-spacing:-.02em;color:#000}
+.sl{font-size:11px;color:#8e8e93;font-weight:500;margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+
+input[type="checkbox"]{width:22px;height:22px;accent-color:#e8912e;cursor:pointer;border-radius:6px}
+.ai{padding:14px 0}
+.ai+.ai{border-top:1px solid #f2f2f7}
+.ac{display:flex;gap:16px;padding-left:28px;margin-top:8px}
+.ac label{display:flex;align-items:center;gap:8px;font-size:14px;color:#8e8e93;cursor:pointer;user-select:none}
+.done{opacity:.3;text-decoration:line-through}
+.pill{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;display:inline-block}
+
+/* Gate check row */
+.gate-row{display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer;user-select:none}
+.gate-row+.gate-row{border-top:1px solid #f2f2f7}
+.gate-box{
+  width:24px;height:24px;border-radius:7px;
+  border:2px solid #d1d1d6;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,border-color .15s
+}
+.gate-box.checked{background:#e8912e;border-color:#e8912e}
+.gate-box.checked svg{opacity:1}
+.gate-box svg{opacity:0;transition:opacity .15s}
+
+@media(max-width:380px){.t1{font-size:24px}.sv{font-size:20px}}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useEffect} = React;
-const e = React.createElement;
-
-// ── Storage ──
+const {useState,useEffect}=React;
 const SK="goal-machine-v5";
 const db={
   load(){try{const d=localStorage.getItem(SK);return d?JSON.parse(d):null}catch{return null}},
-  save(data){try{localStorage.setItem(SK,JSON.stringify(data))}catch(e){console.error(e)}}
+  save(d){try{localStorage.setItem(SK,JSON.stringify(d))}catch(e){console.error(e)}}
 };
-const today=()=>new Date().toISOString().slice(0,10);
-const daysB=(a,b)=>Math.max(0,Math.ceil((new Date(b)-new Date(a))/864e5));
+const td=()=>new Date().toISOString().slice(0,10);
+const dB=(a,b)=>Math.max(0,Math.ceil((new Date(b)-new Date(a))/864e5));
 const pct=(v,t)=>t>0?Math.min(100,Math.round(v/t*100)):0;
 
-// ── SVG Charts ──
-function BarChart({data,quota,height=130}){
+function Bars({data,q,h=110}){
   if(!data.length)return null;
-  const max=Math.max(quota,...data.map(d=>d.v))||1;
-  const w=100/data.length;
-  return(
-    <svg viewBox={`0 0 100 ${height}`} style={{width:"100%",height:height}} preserveAspectRatio="none">
-      {data.map((d,i)=>{
-        const h=(d.v/max)*(height-20);
-        const color=d.v>=quota?"#5e8c61":d.v>0?"#e0a458":"#a8442f";
-        return <g key={i}>
-          <rect x={i*w+w*.15} y={height-h} width={w*.7} height={h} fill={color} rx="1"/>
-          <text x={i*w+w/2} y={height-h-4} textAnchor="middle" fill="#8fa6a0" fontSize="6">{d.v}</text>
-        </g>;
-      })}
-      <line x1="0" y1={height-(quota/max)*(height-20)} x2="100" y2={height-(quota/max)*(height-20)} stroke="#e0a458" strokeWidth=".5" strokeDasharray="2,2"/>
-    </svg>
-  );
+  const mx=Math.max(q,...data.map(d=>d.v))||1,w=100/data.length;
+  return <svg viewBox={`0 0 100 ${h}`} style={{width:"100%",height:h}} preserveAspectRatio="none">
+    {data.map((d,i)=>{const bh=Math.max(1,(d.v/mx)*(h-12));return <rect key={i} x={i*w+w*.12} y={h-bh} width={w*.76} height={bh} fill={d.v>=q?"#34c759":d.v>0?"#e8912e":"#ff3b30"} rx="3"/>})}
+    <line x1="0" y1={h-(q/mx)*(h-12)} x2="100" y2={h-(q/mx)*(h-12)} stroke="#e8912e" strokeWidth=".4" strokeDasharray="2,2" opacity=".4"/>
+  </svg>;
 }
 
-function AreaChartSVG({data,height=140}){
+function Trend({data,h=130}){
   if(data.length<2)return null;
-  const vals=data.map(d=>d.v);
-  const tgts=data.map(d=>d.t);
-  const all=[...vals,...tgts];
-  const min=Math.min(...all),max=Math.max(...all)||1;
-  const range=max-min||1;
-  const px=(i)=>(i/(data.length-1))*100;
-  const py=(v)=>height-20-((v-min)/range)*(height-30);
-  const actualPath=data.map((d,i)=>`${i===0?"M":"L"}${px(i)},${py(d.v)}`).join(" ");
-  const areaPath=actualPath+` L100,${height-20} L0,${height-20} Z`;
-  const targetPath=data.map((d,i)=>`${i===0?"M":"L"}${px(i)},${py(d.t)}`).join(" ");
-  return(
-    <svg viewBox={`0 0 100 ${height}`} style={{width:"100%",height:height}} preserveAspectRatio="none">
-      <defs><linearGradient id="af" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#e0a458" stopOpacity=".3"/><stop offset="100%" stopColor="#e0a458" stopOpacity="0"/></linearGradient></defs>
-      <path d={areaPath} fill="url(#af)"/>
-      <path d={targetPath} fill="none" stroke="#254042" strokeWidth=".7" strokeDasharray="2,2"/>
-      <path d={actualPath} fill="none" stroke="#e0a458" strokeWidth="1.2"/>
-      {data.map((d,i)=><circle key={i} cx={px(i)} cy={py(d.v)} r="1.5" fill="#e0a458"/>)}
-    </svg>
-  );
+  const vs=data.map(d=>d.v),ts=data.map(d=>d.t),al=[...vs,...ts];
+  const mn=Math.min(...al),mx=Math.max(...al)||1,rng=mx-mn||1;
+  const px=i=>(i/(data.length-1))*100,py=v=>h-18-((v-mn)/rng)*(h-28);
+  const ap=data.map((d,i)=>`${i?'L':'M'}${px(i)},${py(d.v)}`).join(" ");
+  return <svg viewBox={`0 0 100 ${h}`} style={{width:"100%",height:h}} preserveAspectRatio="none">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#e8912e" stopOpacity=".1"/><stop offset="100%" stopColor="#e8912e" stopOpacity="0"/></linearGradient></defs>
+    <path d={ap+` L100,${h-18} L0,${h-18} Z`} fill="url(#g)"/>
+    <path d={data.map((d,i)=>`${i?'L':'M'}${px(i)},${py(d.t)}`).join(" ")} fill="none" stroke="#e5e5ea" strokeWidth=".6" strokeDasharray="3,3"/>
+    <path d={ap} fill="none" stroke="#e8912e" strokeWidth="1.8" strokeLinecap="round"/>
+    {data.map((d,i)=><circle key={i} cx={px(i)} cy={py(d.v)} r="2.5" fill="#e8912e" stroke="#fff" strokeWidth="1.5"/>)}
+  </svg>;
 }
 
-function ProgressRing({percent,size=120,stroke=8,color="#e0a458"}){
-  const r=(size-stroke)/2,c=2*Math.PI*r,o=c-(Math.min(percent,100)/100)*c;
-  return(
-    <svg width={size} height={size} style={{transform:"rotate(-90deg)"}}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#254042" strokeWidth={stroke}/>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeDasharray={c} strokeDashoffset={o} strokeLinecap="round" style={{transition:"stroke-dashoffset .6s"}}/>
-    </svg>
-  );
+function Ring({pct:p,size=130,w=10,color="#e8912e"}){
+  const r=(size-w)/2,c=2*Math.PI*r,o=c-(Math.min(p,100)/100)*c;
+  return <svg width={size} height={size} style={{transform:"rotate(-90deg)"}}>
+    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#f2f2f7" strokeWidth={w}/>
+    <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={w} strokeDasharray={c} strokeDashoffset={o} strokeLinecap="round" style={{transition:"stroke-dashoffset .6s"}}/>
+  </svg>;
 }
 
-function GapGauge({gapPct}){
-  const phase=gapPct>60?"REBUILD":gapPct>25?"ADJUST":"FINE-TUNE";
-  const color=gapPct>60?"#a8442f":gapPct>25?"#e0a458":"#5e8c61";
-  return(
-    <div className="card">
-      <div className="row" style={{justifyContent:"space-between",marginBottom:8}}>
-        <span className="h3" style={{margin:0}}>Correction Dial</span>
-        <span className="pill" style={{color,background:color+"18"}}>{phase}</span>
-      </div>
-      <div style={{background:"var(--surface)",height:10,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",left:0,top:0,bottom:0,width:Math.min(100,Math.max(5,gapPct))+"%",background:color,transition:"width .4s"}}/>
-      </div>
-      <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--dim)",marginTop:4}}>
-        <span>Fine-tune</span><span>Adjust</span><span>Rebuild</span>
-      </div>
+function Gauge({g}){
+  const p=g>60?"REBUILD":g>25?"ADJUST":"FINE-TUNE";
+  const c=g>60?"#ff3b30":g>25?"#e8912e":"#34c759";
+  return <div className="card">
+    <div className="row" style={{justifyContent:"space-between",marginBottom:10}}>
+      <span className="t2" style={{fontSize:15}}>Correction</span>
+      <span className="pill" style={{color:c,background:c+"12"}}>{p}</span>
     </div>
-  );
+    <div style={{background:"#f2f2f7",height:6,borderRadius:3,overflow:"hidden"}}>
+      <div style={{height:"100%",borderRadius:3,width:Math.min(100,Math.max(5,g))+"%",background:c,transition:"width .4s"}}/>
+    </div>
+    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#aeaeb2",marginTop:8}}>
+      <span>Fine-tune</span><span>Adjust</span><span>Rebuild</span>
+    </div>
+  </div>;
 }
 
-// ━━━ SETUP ━━━
-function SetupView({config,onSave}){
+function Check({label,checked,onToggle}){
+  return <div className="gate-row" onClick={onToggle}>
+    <div className={"gate-box"+(checked?" checked":"")}>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7.5L5.5 10L11 4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+    </div>
+    <span style={{fontSize:15,color:checked?"#1c1c1e":"#8e8e93",transition:"color .15s"}}>{label}</span>
+  </div>;
+}
+
+/* ━━━ SETUP ━━━ */
+function Setup({onSave}){
   const def={goal:"",deadline:"",metric:"",targetValue:"",currentValue:"0",dailyQuota:"",actions:[{id:1,name:""}],rules:[{signal:"",response:""}]};
-  const example={goal:"Lose 20 pounds",deadline:new Date(Date.now()+90*864e5).toISOString().slice(0,10),metric:"Scale weight (lbs)",targetValue:"180",currentValue:"200",dailyQuota:"4",actions:[{id:1,name:"Hit calorie target (under 2000)"},{id:2,name:"30 min workout"},{id:3,name:"10,000 steps"},{id:4,name:"Log all meals"}],rules:[{signal:"I miss a workout",response:"Do 15 min bodyweight session — something beats nothing"},{signal:"Weight stalls for 2 weeks",response:"Cut 200 more calories or add one extra walk per day"}]};
-  const[f,setF]=useState(config||def);
-  const u=(k,v)=>setF(p=>({...p,[k]:v}));
+  const ex={goal:"Lose 20 pounds",deadline:new Date(Date.now()+90*864e5).toISOString().slice(0,10),metric:"Scale weight (lbs)",targetValue:"180",currentValue:"200",dailyQuota:"4",actions:[{id:1,name:"Hit calorie target (under 2000)"},{id:2,name:"30 min workout"},{id:3,name:"10,000 steps"},{id:4,name:"Log all meals"}],rules:[{signal:"I miss a workout",response:"Do 15 min bodyweight — something beats nothing"},{signal:"Weight stalls 2 weeks",response:"Cut 200 cal or add one extra walk/day"}]};
+  const[f,sF]=useState(def);
+  const[gates,sG]=useState([false,false,false]);
+  const u=(k,v)=>sF(p=>({...p,[k]:v}));
   const uA=(i,v)=>{const a=[...f.actions];a[i]={...a[i],name:v};u("actions",a)};
   const aA=()=>u("actions",[...f.actions,{id:Date.now(),name:""}]);
-  const rA=(i)=>u("actions",f.actions.filter((_,j)=>j!==i));
+  const rA=i=>u("actions",f.actions.filter((_,j)=>j!==i));
   const uR=(i,k,v)=>{const r=[...f.rules];r[i]={...r[i],[k]:v};u("rules",r)};
   const aR=()=>u("rules",[...f.rules,{signal:"",response:""}]);
-  const rR=(i)=>u("rules",f.rules.filter((_,j)=>j!==i));
-  const ok=f.goal&&f.deadline&&f.metric&&f.targetValue&&f.dailyQuota;
+  const rR=i=>u("rules",f.rules.filter((_,j)=>j!==i));
+  const allGates=gates.every(Boolean);
+  const ok=f.goal&&f.deadline&&f.metric&&f.targetValue&&f.dailyQuota&&allGates;
+  const toggleGate=i=>{const g=[...gates];g[i]=!g[i];sG(g)};
 
-  return(
-    <div>
-      <div style={{padding:"32px 0 24px"}}>
-        <span className="tag" style={{color:"var(--amber)",border:"1px solid var(--border)"}}>v5.0</span>
-        <h1 className="h1" style={{fontSize:32,marginTop:10}}>Goal Machine</h1>
-        <p style={{color:"var(--dim)",marginTop:6,lineHeight:1.6}}>Most goals fail because you rely on willpower. This system replaces willpower with structure — so the right action happens daily, with instant feedback and automatic correction. Plug in any goal with a number and a deadline. The machine tells you what to do, tracks whether it's working, and fixes itself when it's not.</p>
-      </div>
-
-      <button onClick={()=>setF(example)} className="btn-sec" style={{width:"100%",marginBottom:16,padding:"12px 16px",fontSize:13,borderStyle:"dashed"}}>📋 Load an example to see how it works</button>
-
-      <div className="card" style={{borderColor:"var(--amber)"}}>
-        <div className="tag" style={{color:"var(--bg)",background:"var(--amber)",marginBottom:10}}>Gate</div>
-        <p style={{color:"var(--dim)",fontSize:13,marginBottom:12}}>Three checks before the machine starts.</p>
-        {["Can you measure the result with a number?","Do people actually succeed doing it this way?","Is there something you can do every day that moves it forward?"].map((q,i)=>(
-          <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"8px 0",borderBottom:i<2?"1px solid var(--border)":"none"}}>
-            <span className="dot" style={{background:"var(--amber)",boxShadow:"0 0 8px #e0a45888",marginTop:5}}/>
-            <span style={{fontSize:13}}>{q}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="spacer"/>
-
-      <div className="card">
-        <div className="tag" style={{color:"var(--rust)",border:"1px solid #c8622e44",marginBottom:12}}>Define Goal</div>
-        <div style={{marginBottom:14}}><label className="label">I will achieve</label><input className="input" placeholder="e.g. Lose 20 lbs, Save $5K, Pass AWS exam, Run a marathon" value={f.goal} onChange={e=>u("goal",e.target.value)}/></div>
-        <div style={{marginBottom:14}}><label className="label">By this date</label><input className="input" type="date" value={f.deadline} onChange={e=>u("deadline",e.target.value)}/></div>
-        <div style={{marginBottom:14}}><label className="label">How will you track progress?</label><input className="input" placeholder="e.g. Body weight on scale (lbs)" value={f.metric} onChange={e=>u("metric",e.target.value)}/><div style={{fontSize:12,color:"var(--dim)",marginTop:4}}>The one number you'll check daily to know if it's working. Examples: scale weight, bank balance, practice test score, revenue in CRM, pages written, miles run.</div></div>
-        <div style={{display:"flex",gap:8}}>
-          <div style={{flex:1}}><label className="label">Target number</label><input className="input" type="number" placeholder="e.g. 180" value={f.targetValue} onChange={e=>u("targetValue",e.target.value)}/></div>
-          <div style={{flex:1}}><label className="label">Where I am now</label><input className="input" type="number" placeholder="e.g. 200" value={f.currentValue} onChange={e=>u("currentValue",e.target.value)}/></div>
-        </div>
-        <div style={{marginTop:14}}><label className="label">How many actions per day?</label><input className="input" type="number" placeholder="e.g. 5" value={f.dailyQuota} onChange={e=>u("dailyQuota",e.target.value)}/><div style={{fontSize:12,color:"var(--dim)",marginTop:4}}>The minimum number of goal-advancing actions you'll complete each day. Not hours — actions. Examples: 5 sales calls, 3 study sessions, 4 workouts per week (1/day avg), 2 job applications. Pick a number you can hit on your worst day.</div></div>
-      </div>
-
-      <div className="card">
-        <div className="tag" style={{color:"var(--teal)",border:"1px solid #2a7a6e44",marginBottom:12}}>Actions by Priority</div>
-        <p style={{fontSize:12,color:"var(--dim)",marginBottom:6}}>List the specific things you'll do each day to reach your goal — then rank them. Put the action most likely to move the needle at #1.</p>
-        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10,fontStyle:"italic"}}>Weight loss example: 1) Hit calorie target, 2) 30 min workout, 3) 10K steps. Sales example: 1) Follow up open quotes, 2) Call active buyers, 3) Prospect new accounts.</p>
-        {f.actions.map((a,i)=>{
-          const ph=["Most important daily action","Second most important","Third priority","Supporting action"];
-          return(
-          <div key={a.id} style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
-            <span style={{fontSize:12,fontWeight:700,color:"var(--amber)",minWidth:14}}>{i+1}</span>
-            <input className="input" style={{flex:1}} placeholder={ph[i]||"Action "+(i+1)} value={a.name} onChange={e=>uA(i,e.target.value)}/>
-            {f.actions.length>1&&<button onClick={()=>rA(i)} style={{background:"none",border:"none",color:"var(--red)",cursor:"pointer",fontSize:18}}>×</button>}
-          </div>
-        )})}
-        <button onClick={aA} className="btn-sec" style={{width:"100%",marginTop:4,fontSize:12}}>+ Add action</button>
-      </div>
-
-      <div className="card">
-        <div className="tag" style={{color:"var(--green)",border:"1px solid #5e8c6144",marginBottom:12}}>If-Then Rules</div>
-        <p style={{fontSize:12,color:"var(--dim)",marginBottom:6}}>When something goes wrong, what will you do? Write the answer now — so you don't have to think in the moment. These are your automatic corrections.</p>
-        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10,fontStyle:"italic"}}>Examples: IF I miss my calorie target → THEN I walk an extra 20 min. IF a prospect says "too expensive" → THEN I ask what it's costing them to stay the same. IF I skip a workout → THEN I do a 15 min bodyweight session instead.</p>
-        {f.rules.map((r,i)=>{
-          const sigPh=["e.g. I skip a day","e.g. I'm not seeing results after 2 weeks"];
-          const resPh=["e.g. Do a smaller version instead of nothing","e.g. Change my approach, not my effort"];
-          return(
-          <div key={i} style={{marginBottom:10,padding:"8px 0",borderBottom:"1px solid var(--border)"}}>
-            <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:4}}>
-              <span style={{fontSize:11,fontWeight:700,color:"var(--amber)"}}>IF</span>
-              <input className="input" style={{flex:1,fontSize:13}} placeholder={sigPh[i]||"something goes wrong..."} value={r.signal} onChange={e=>uR(i,"signal",e.target.value)}/>
-              {f.rules.length>1&&<button onClick={()=>rR(i)} style={{background:"none",border:"none",color:"var(--red)",cursor:"pointer",fontSize:18}}>×</button>}
-            </div>
-            <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              <span style={{fontSize:11,fontWeight:700,color:"var(--green)"}}>THEN</span>
-              <input className="input" style={{flex:1,fontSize:13}} placeholder={resPh[i]||"here's my fix..."} value={r.response} onChange={e=>uR(i,"response",e.target.value)}/>
-            </div>
-          </div>
-        )})}
-        <button onClick={aR} className="btn-sec" style={{width:"100%",fontSize:12}}>+ Add rule</button>
-      </div>
-
-      <div className="spacer"/>
-      <button className="btn" disabled={!ok} onClick={()=>ok&&onSave({...f,targetValue:Number(f.targetValue),currentValue:Number(f.currentValue),dailyQuota:Number(f.dailyQuota),createdAt:today()})}>Activate Machine →</button>
-      <p style={{textAlign:"center",fontSize:11,color:"var(--dim)",marginTop:10}}>All data stays on your device.</p>
+  return <div>
+    <div style={{padding:"32px 0 20px"}}>
+      <p className="t1" style={{fontSize:32}}>Goal Machine</p>
+      <p style={{color:"#8e8e93",marginTop:8,fontSize:15,lineHeight:1.6}}>Replace willpower with structure. Plug in a goal — the system handles feedback, correction, and daily execution.</p>
     </div>
-  );
+
+    <button onClick={()=>sF(ex)} className="btn-sec" style={{width:"100%",marginBottom:14,borderStyle:"dashed"}}>Load an example</button>
+
+    <div className="card">
+      <p className="t2" style={{fontSize:15,marginBottom:4}}>Before you start</p>
+      <p className="t4" style={{marginBottom:8}}>Check all three or the machine won't activate.</p>
+      <Check label="I can measure the result with a number" checked={gates[0]} onToggle={()=>toggleGate(0)}/>
+      <Check label="People actually succeed doing it this way" checked={gates[1]} onToggle={()=>toggleGate(1)}/>
+      <Check label="I can act on it every single day" checked={gates[2]} onToggle={()=>toggleGate(2)}/>
+    </div>
+
+    <div className="gap"/>
+
+    <div className="card">
+      <p className="accent" style={{fontSize:14,fontWeight:700,marginBottom:16}}>Define Your Goal</p>
+
+      <div className="f">
+        <label className="t3" style={{display:"block",marginBottom:6}}>I will achieve</label>
+        <input className="input" placeholder="Lose 20 lbs, Save $5K, Pass AWS exam" value={f.goal} onChange={e=>u("goal",e.target.value)}/>
+      </div>
+      <div className="f">
+        <label className="t3" style={{display:"block",marginBottom:6}}>By this date</label>
+        <input type="date" className="input" value={f.deadline} onChange={e=>u("deadline",e.target.value)}/>
+      </div>
+      <div className="f">
+        <label className="t3" style={{display:"block",marginBottom:6}}>How will you track progress?</label>
+        <input className="input" placeholder="Scale weight (lbs), Bank balance ($)" value={f.metric} onChange={e=>u("metric",e.target.value)}/>
+        <p className="t4" style={{marginTop:6}}>The one number you'll check daily.</p>
+      </div>
+      <div className="f" style={{display:"flex",gap:10}}>
+        <div style={{flex:1}}>
+          <label className="t3" style={{display:"block",marginBottom:6}}>Target</label>
+          <input type="number" className="input" placeholder="180" value={f.targetValue} onChange={e=>u("targetValue",e.target.value)}/>
+        </div>
+        <div style={{flex:1}}>
+          <label className="t3" style={{display:"block",marginBottom:6}}>Starting</label>
+          <input type="number" className="input" placeholder="200" value={f.currentValue} onChange={e=>u("currentValue",e.target.value)}/>
+        </div>
+      </div>
+      <div>
+        <label className="t3" style={{display:"block",marginBottom:6}}>Actions per day</label>
+        <input type="number" className="input" placeholder="4" value={f.dailyQuota} onChange={e=>u("dailyQuota",e.target.value)}/>
+        <p className="t4" style={{marginTop:6}}>Not hours — actions. Pick a number you can hit on your worst day.</p>
+      </div>
+    </div>
+
+    <div className="card">
+      <p className="accent" style={{fontSize:14,fontWeight:700,marginBottom:4}}>Actions by Priority</p>
+      <p className="t4" style={{marginBottom:12}}>Ranked by impact. #1 moves the needle most.</p>
+      {f.actions.map((a,i)=>{
+        const ph=["Most important action","Second priority","Third priority","Supporting action"];
+        return <div key={a.id} style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
+          <span style={{fontSize:14,fontWeight:700,color:"#e8912e",minWidth:16,textAlign:"center"}}>{i+1}</span>
+          <input className="input" style={{flex:1,height:44}} placeholder={ph[i]||"Action "+(i+1)} value={a.name} onChange={e=>uA(i,e.target.value)}/>
+          {f.actions.length>1&&<button onClick={()=>rA(i)} style={{background:"none",border:"none",color:"#aeaeb2",cursor:"pointer",fontSize:22,padding:"0 4px"}}>×</button>}
+        </div>;
+      })}
+      <button onClick={aA} className="btn-sec" style={{width:"100%",marginTop:4,height:38,fontSize:13}}>+ Add action</button>
+    </div>
+
+    <div className="card">
+      <p className="accent" style={{fontSize:14,fontWeight:700,marginBottom:4}}>If-Then Rules</p>
+      <p className="t4" style={{marginBottom:12}}>Pre-decide what you'll do when things go wrong.</p>
+      {f.rules.map((r,i)=>{
+        const sp=["I skip a day","No results after 2 weeks"];
+        const rp=["Do a smaller version instead","Change approach, not effort"];
+        return <div key={i} style={{marginBottom:14,paddingBottom:14,borderBottom:"1px solid #f2f2f7"}}>
+          <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:6}}>
+            <span style={{fontSize:13,fontWeight:700,color:"#e8912e",minWidth:36}}>IF</span>
+            <input className="input" style={{flex:1,height:44,fontSize:14}} placeholder={sp[i]||"something goes wrong..."} value={r.signal} onChange={e=>uR(i,"signal",e.target.value)}/>
+            {f.rules.length>1&&<button onClick={()=>rR(i)} style={{background:"none",border:"none",color:"#aeaeb2",cursor:"pointer",fontSize:22}}>×</button>}
+          </div>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            <span style={{fontSize:13,fontWeight:700,color:"#34c759",minWidth:36}}>THEN</span>
+            <input className="input" style={{flex:1,height:44,fontSize:14}} placeholder={rp[i]||"here's my fix..."} value={r.response} onChange={e=>uR(i,"response",e.target.value)}/>
+          </div>
+        </div>;
+      })}
+      <button onClick={aR} className="btn-sec" style={{width:"100%",height:38,fontSize:13}}>+ Add rule</button>
+    </div>
+
+    <div className="gap"/>
+    <button className="btn" disabled={!ok} onClick={()=>ok&&onSave({...f,targetValue:Number(f.targetValue),currentValue:Number(f.currentValue),dailyQuota:Number(f.dailyQuota),createdAt:td()})}>Activate Machine</button>
+    {!allGates&&<p style={{textAlign:"center",fontSize:13,color:"#aeaeb2",marginTop:10}}>Check all three gates above to activate.</p>}
+    <p style={{textAlign:"center",fontSize:12,color:"#c7c7cc",marginTop:8}}>Data stays on your device.</p>
+  </div>;
 }
 
-// ━━━ DASHBOARD ━━━
-function DashView({config:c,logs}){
-  const td=today(),dl=daysB(td,c.deadline),tot=Math.max(1,daysB(c.createdAt,c.deadline)),el=tot-dl;
+/* ━━━ DASHBOARD ━━━ */
+function Dash({config:c,logs}){
+  const d=td(),dl=dB(d,c.deadline),tot=Math.max(1,dB(c.createdAt,c.deadline)),el=tot-dl;
   const dec=Number(c.currentValue)>Number(c.targetValue);
   const delta=Math.abs(c.targetValue-Number(c.currentValue));
-  const latest=logs.length?logs[logs.length-1].outputValue:Number(c.currentValue);
-  const prog=dec?Number(c.currentValue)-latest:latest-Number(c.currentValue);
+  const lat=logs.length?logs[logs.length-1].outputValue:Number(c.currentValue);
+  const prog=dec?Number(c.currentValue)-lat:lat-Number(c.currentValue);
   const pp=pct(Math.max(0,prog),delta);
   const rem=delta-Math.max(0,prog);
   const rp=dl>0?(rem/dl).toFixed(1):"—";
   const ap=el>0?(Math.max(0,prog)/el).toFixed(1):"0";
   const gp=rp!=="—"&&Number(ap)>0?Math.max(0,100-pct(Number(ap),Number(rp))):el===0?0:80;
-  const ps=gp<=10?{l:"ON PACE",c:"#5e8c61"}:gp<=40?{l:"BEHIND",c:"#e0a458"}:{l:"OFF PACE",c:"#a8442f"};
-  const chartData=logs.map((l,i)=>({v:l.outputValue,t:dec?Number(c.currentValue)-(delta/tot*(i+1)):Number(c.currentValue)+(delta/tot*(i+1))}));
-  let streak=0;for(let i=logs.length-1;i>=0;i--){if(logs[i].actionsCompleted>=c.dailyQuota)streak++;else break;}
+  const ps=gp<=10?{l:"ON PACE",c:"#34c759"}:gp<=40?{l:"BEHIND",c:"#e8912e"}:{l:"OFF PACE",c:"#ff3b30"};
+  const cd=logs.map((l,i)=>({v:l.outputValue,t:dec?Number(c.currentValue)-(delta/tot*(i+1)):Number(c.currentValue)+(delta/tot*(i+1))}));
+  let sk=0;for(let i=logs.length-1;i>=0;i--){if(logs[i].actionsCompleted>=c.dailyQuota)sk++;else break;}
 
-  return(
-    <div>
-      <div style={{padding:"28px 0 20px"}}>
-        <p style={{fontSize:12,color:"var(--dim)",fontWeight:600,textTransform:"uppercase",letterSpacing:".08em"}}>Current Goal</p>
-        <h1 className="h1" style={{fontSize:24,marginTop:4}}>{c.goal}</h1>
-        <div className="row" style={{marginTop:8,flexWrap:"wrap",gap:6}}>
-          <span className="pill" style={{color:ps.c,background:ps.c+"18"}}>{ps.l}</span>
-          <span style={{fontSize:12,color:"var(--dim)"}}>{c.metric} · Due {c.deadline}</span>
-        </div>
-      </div>
-
-      <div className="card" style={{display:"flex",alignItems:"center",gap:20}}>
-        <div style={{position:"relative",flexShrink:0}}>
-          <ProgressRing percent={pp} color={ps.c}/>
-          <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-            <span style={{fontSize:28,fontWeight:800,color:ps.c}}>{pp}%</span>
-            <span style={{fontSize:11,color:"var(--dim)"}}>complete</span>
-          </div>
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:10,flex:1}}>
-          <div><span style={{fontSize:12,color:"var(--dim)"}}>Days left</span><br/><span style={{fontSize:20,fontWeight:700}}>{dl}</span></div>
-          <div><span style={{fontSize:12,color:"var(--dim)"}}>Streak</span><br/><span style={{fontSize:20,fontWeight:700,color:streak>=3?"var(--green)":"var(--ink)"}}>{streak} day{streak!==1?"s":""}</span></div>
-        </div>
-      </div>
-
-      <div style={{display:"flex",gap:8}}>
-        <div className="stat-box"><div className="stat-val" style={{color:ps.c}}>{ap}</div><div className="stat-label">Your pace</div><div className="stat-sub">per day</div></div>
-        <div className="stat-box"><div className="stat-val">{rp}</div><div className="stat-label">Needed</div><div className="stat-sub">per day</div></div>
-        <div className="stat-box"><div className="stat-val">{latest}</div><div className="stat-label">Current</div><div className="stat-sub">{c.metric}</div></div>
-      </div>
-
-      <GapGauge gapPct={gp}/>
-
-      {chartData.length>1&&(
-        <div className="card">
-          <span className="h3">Trend</span>
-          <div style={{marginTop:8,padding:"0 4px"}}><AreaChartSVG data={chartData}/></div>
-          <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--dim)",marginTop:4,padding:"0 4px"}}>
-            <span>Day 1</span><span style={{color:"var(--amber)"}}>— Actual</span><span style={{color:"#254042"}}>┄ Target</span><span>Day {chartData.length}</span>
-          </div>
-        </div>
-      )}
-
-      <div className="card">
-        <span className="h3">Action Priority Stack</span>
-        {c.actions.filter(a=>a.name).map((a,i)=>(
-          <div key={a.id} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:i<c.actions.filter(a=>a.name).length-1?"1px solid var(--border)":"none"}}>
-            <span style={{fontSize:12,fontWeight:800,color:i===0?"var(--rust)":i===1?"var(--amber)":"var(--dim)",minWidth:18}}>L{i+1}</span>
-            <span style={{fontSize:13}}>{a.name}</span>
-          </div>
-        ))}
+  return <div>
+    <div style={{padding:"28px 0 16px"}}>
+      <p className="t3">Current Goal</p>
+      <p className="t1" style={{marginTop:4}}>{c.goal}</p>
+      <div className="row" style={{marginTop:8,gap:8}}>
+        <span className="pill" style={{color:ps.c,background:ps.c+"12"}}>{ps.l}</span>
+        <span className="t3">{c.deadline}</span>
       </div>
     </div>
-  );
-}
 
-// ━━━ DAILY ━━━
-function DailyView({config:c,logs,onLog}){
-  const td=today(),ex=logs.find(l=>l.date===td);
-  const[acts,setActs]=useState(()=>c.actions.filter(a=>a.name).map(a=>({...a,done:false,quality:false})));
-  const[ov,setOv]=useState(ex?.outputValue??"");
-  const[blanks,setBlanks]=useState(0);
-  const[best,setBest]=useState("");
-  const[imp,setImp]=useState("");
-  const[notes,setNotes]=useState("");
-  const[saved,setSaved]=useState(!!ex);
-  useEffect(()=>{if(ex){setOv(ex.outputValue);setBest(ex.bestAction||"");setImp(ex.improvement||"");setNotes(ex.notes||"")}},[]);
-
-  const done=acts.filter(a=>a.done&&a.quality).length;
-
-  return(
-    <div>
-      <div style={{padding:"28px 0 20px"}}>
-        <p style={{fontSize:12,color:"var(--dim)",fontWeight:600,textTransform:"uppercase",letterSpacing:".08em"}}>{new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
-        <h1 className="h1" style={{fontSize:24,marginTop:4}}>Daily Loop</h1>
-      </div>
-
-      <div className="card" style={{borderColor:done>=c.dailyQuota?"var(--green)":"var(--border)"}}>
-        <div className="row" style={{justifyContent:"space-between",marginBottom:8}}>
-          <span className="h3" style={{margin:0}}>Quota</span>
-          <span style={{fontSize:20,fontWeight:800,color:done>=c.dailyQuota?"var(--green)":"var(--amber)"}}>{done}/{c.dailyQuota}</span>
-        </div>
-        <div style={{background:"var(--surface)",height:6,overflow:"hidden"}}>
-          <div style={{height:"100%",width:pct(done,c.dailyQuota)+"%",background:done>=c.dailyQuota?"var(--green)":"var(--amber)",transition:"width .3s"}}/>
+    <div className="card" style={{display:"flex",alignItems:"center",gap:16}}>
+      <div style={{position:"relative",flexShrink:0}}>
+        <Ring pct={pp} color={ps.c}/>
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+          <span style={{fontSize:30,fontWeight:700,color:"#000"}}>{pp}<span style={{fontSize:16}}>%</span></span>
         </div>
       </div>
-
-      {blanks>=5&&(
-        <div className="card" style={{borderColor:"var(--red)",background:"#a8442f12"}}>
-          <div className="row"><span style={{fontSize:18}}>⚡</span><div><div style={{fontWeight:700,color:"var(--red)"}}>Circuit Breaker Tripped</div><div style={{fontSize:12,color:"var(--dim)"}}>5 blanks. Switch targets or method.</div></div></div>
+      <div style={{flex:1}}>
+        <div style={{marginBottom:16}}>
+          <p className="t3">Days left</p>
+          <p style={{fontSize:28,fontWeight:700,color:"#000",marginTop:2}}>{dl}</p>
         </div>
-      )}
-
-      <div className="card">
-        <span className="h3">Actions</span>
-        <p style={{fontSize:12,color:"var(--dim)",marginBottom:10}}>Both boxes checked = counts toward quota.</p>
-        {acts.map((a,i)=>(
-          <div key={a.id} style={{padding:"10px 0",borderTop:i>0?"1px solid var(--border)":"none"}}>
-            <div style={{display:"flex",alignItems:"center",gap:10}}>
-              <span style={{fontSize:12,fontWeight:700,color:"var(--amber)"}}>{i+1}</span>
-              <span style={{flex:1,fontSize:14}}>{a.name}</span>
-            </div>
-            <div style={{display:"flex",gap:12,paddingLeft:24,marginTop:6}}>
-              <label style={{display:"flex",alignItems:"center",gap:6,fontSize:13,color:"var(--dim)",cursor:"pointer"}}>
-                <input type="checkbox" checked={a.done} onChange={()=>{const u=[...acts];u[i]={...u[i],done:!u[i].done};setActs(u)}}/>Did it
-              </label>
-              <label style={{display:"flex",alignItems:"center",gap:6,fontSize:13,color:"var(--dim)",cursor:"pointer"}}>
-                <input type="checkbox" checked={a.quality} disabled={!a.done} onChange={()=>{const u=[...acts];u[i]={...u[i],quality:!u[i].quality};setActs(u)}} style={{accentColor:"var(--green)"}}/>Done right
-              </label>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="card">
-        <div className="row" style={{justifyContent:"space-between"}}>
-          <span className="h3" style={{margin:0}}>Consecutive Blanks</span>
-          <div className="row">
-            <button className="btn-sec" style={{padding:"4px 12px"}} onClick={()=>setBlanks(Math.max(0,blanks-1))}>−</button>
-            <span style={{fontSize:20,fontWeight:800,minWidth:28,textAlign:"center",color:blanks>=5?"var(--red)":blanks>=3?"var(--amber)":"var(--ink)"}}>{blanks}</span>
-            <button className="btn-sec" style={{padding:"4px 12px"}} onClick={()=>setBlanks(blanks+1)}>+</button>
-          </div>
+        <div>
+          <p className="t3">Streak</p>
+          <p style={{fontSize:28,fontWeight:700,color:sk>=3?"#34c759":"#000",marginTop:2}}>{sk}<span style={{fontSize:15,fontWeight:500,color:"#8e8e93",marginLeft:4}}>day{sk!==1?"s":""}</span></p>
         </div>
-        <div style={{fontSize:12,color:"var(--dim)",marginTop:4}}>Zero-signal actions in a row. Reset on response.</div>
       </div>
-
-      <div className="divider"/>
-      <div className="tag" style={{color:"var(--amber)",border:"1px solid #e0a45844",marginBottom:12}}>Save State</div>
-
-      <div style={{marginBottom:14}}><label className="label">Today's output ({c.metric})</label><input className="input" type="number" value={ov} onChange={e=>setOv(e.target.value)} placeholder="Current value"/></div>
-      <div style={{marginBottom:14}}><label className="label">Best action today?</label><input className="input" value={best} onChange={e=>setBest(e.target.value)} placeholder="Most signal"/></div>
-      <div style={{marginBottom:14}}><label className="label">One system improvement</label><input className="input" value={imp} onChange={e=>setImp(e.target.value)} placeholder="Template or rule to update"/></div>
-      <div style={{marginBottom:14}}><label className="label">Notes</label><textarea className="textarea" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Capture anything..."/></div>
-
-      <button className="btn" style={{background:saved?"var(--green)":"var(--rust)"}} onClick={()=>{
-        onLog({date:td,actionsCompleted:done,actionsTotal:acts.length,outputValue:Number(ov),bestAction:best,improvement:imp,notes,blanks});
-        setSaved(true);
-      }}>{saved?"✓ Saved — Update":"Save Today's Log"}</button>
     </div>
-  );
-}
 
-// ━━━ HISTORY ━━━
-function HistView({config:c,logs,onReset}){
-  const bd=logs.slice(-14).map(l=>({v:l.actionsCompleted}));
-  return(
-    <div>
-      <div style={{padding:"28px 0 20px"}}>
-        <h1 className="h1" style={{fontSize:24}}>History</h1>
-        <p style={{color:"var(--dim)",fontSize:13,marginTop:4}}>{logs.length} day{logs.length!==1?"s":""} logged</p>
+    <div className="card" style={{display:"flex",padding:0}}>
+      <div className="sbox" style={{borderRight:"1px solid #f2f2f7"}}><div className="sv" style={{color:ps.c}}>{ap}</div><div className="sl">Your pace</div></div>
+      <div className="sbox" style={{borderRight:"1px solid #f2f2f7"}}><div className="sv">{rp}</div><div className="sl">Needed</div></div>
+      <div className="sbox"><div className="sv">{lat}</div><div className="sl">Current</div></div>
+    </div>
+
+    <Gauge g={gp}/>
+
+    {cd.length>1&&<div className="card">
+      <p className="t2" style={{fontSize:15,marginBottom:10}}>Trend</p>
+      <Trend data={cd}/>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#aeaeb2",marginTop:8}}>
+        <span>Day 1</span><span>Day {cd.length}</span>
       </div>
+    </div>}
 
-      {bd.length>1&&(
-        <div className="card">
-          <span className="h3">Daily Actions (last 14d)</span>
-          <div style={{marginTop:8,padding:"0 4px"}}><BarChart data={bd} quota={c.dailyQuota}/></div>
-          <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--dim)",marginTop:4}}>
-            <span>Oldest</span><span style={{color:"var(--amber)"}}>┄ Quota line</span><span>Today</span>
-          </div>
-        </div>
-      )}
-
-      {c.rules?.filter(r=>r.signal).length>0&&(
-        <div className="card">
-          <span className="h3">If-Then Rules</span>
-          {c.rules.filter(r=>r.signal).map((r,i)=>(
-            <div key={i} style={{padding:"8px 0",borderBottom:"1px solid var(--border)",fontSize:13}}>
-              <span style={{color:"var(--amber)",fontWeight:700}}>IF</span> {r.signal} <span style={{color:"var(--green)",fontWeight:700}}>→</span> {r.response}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="tag" style={{color:"var(--dim)",border:"1px solid var(--border)",marginBottom:12,marginTop:8}}>Daily Logs</div>
-      {[...logs].reverse().map((l,i)=>(
-        <div key={i} className="card" style={{padding:12}}>
-          <div className="row" style={{justifyContent:"space-between",marginBottom:6}}>
-            <span style={{fontWeight:700,fontSize:13}}>{l.date}</span>
-            <span className="pill" style={{color:l.actionsCompleted>=c.dailyQuota?"#5e8c61":"#e0a458",background:(l.actionsCompleted>=c.dailyQuota?"#5e8c61":"#e0a458")+"18"}}>{l.actionsCompleted}/{l.actionsTotal}</span>
-          </div>
-          <div style={{fontSize:13,color:"var(--dim)"}}>{c.metric}: <span style={{color:"var(--ink)",fontWeight:600}}>{l.outputValue}</span>{l.bestAction&&<span> · Best: {l.bestAction}</span>}</div>
-          {l.improvement&&<div style={{fontSize:12,color:"var(--teal)",marginTop:4}}>↑ {l.improvement}</div>}
+    <div className="card">
+      <p className="t2" style={{fontSize:15,marginBottom:8}}>Priority Stack</p>
+      {c.actions.filter(a=>a.name).map((a,i)=>(
+        <div key={a.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:i<c.actions.filter(a=>a.name).length-1?"1px solid #f2f2f7":"none"}}>
+          <span style={{fontSize:13,fontWeight:700,color:i===0?"#e8912e":"#aeaeb2",minWidth:16}}>{i+1}</span>
+          <span style={{fontSize:15}}>{a.name}</span>
         </div>
       ))}
-      {!logs.length&&<p style={{color:"var(--dim)",textAlign:"center",padding:24}}>No logs yet.</p>}
-
-      <div className="divider" style={{margin:"24px 0"}}/>
-      <button className="btn-sec" style={{width:"100%",color:"var(--red)",borderColor:"#a8442f44"}} onClick={onReset}>Reset Machine (New Goal)</button>
     </div>
-  );
+  </div>;
 }
 
-// ━━━ APP ━━━
-function App(){
-  const[loading,setLoading]=useState(true);
-  const[config,setConfig]=useState(null);
-  const[logs,setLogs]=useState([]);
-  const[view,setView]=useState("setup");
+/* ━━━ DAILY ━━━ */
+function Daily({config:c,logs,onLog}){
+  const d=td(),ex=logs.find(l=>l.date===d);
+  const[acts,sA]=useState(()=>c.actions.filter(a=>a.name).map(a=>({...a,done:false,quality:false})));
+  const[ov,sO]=useState(ex?.outputValue??"");
+  const[bl,sB]=useState(0);
+  const[best,sBe]=useState("");
+  const[imp,sI]=useState("");
+  const[notes,sN]=useState("");
+  const[saved,sS]=useState(!!ex);
+  useEffect(()=>{if(ex){sO(ex.outputValue);sBe(ex.bestAction||"");sI(ex.improvement||"");sN(ex.notes||"")}},[]);
+  const dn=acts.filter(a=>a.done&&a.quality).length;
+  const met=dn>=c.dailyQuota;
 
-  useEffect(()=>{const d=db.load();if(d?.config){setConfig(d.config);setLogs(d.logs||[]);setView("dash")}setLoading(false)},[]);
-
-  const persist=(c,l)=>db.save({config:c,logs:l});
-  const onSetup=(c)=>{setConfig(c);setLogs([]);persist(c,[]);setView("dash")};
-  const onLog=(log)=>{const u=[...logs.filter(l=>l.date!==log.date),log].sort((a,b)=>a.date.localeCompare(b.date));setLogs(u);persist(config,u)};
-  const onReset=()=>{if(confirm("Erase current goal and all logs?")){setConfig(null);setLogs([]);setView("setup");db.save({config:null,logs:[]})}};
-
-  if(loading)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",color:"var(--dim)"}}>Loading…</div>;
-
-  return(
-    <div>
-      {!config&&<SetupView config={config} onSave={onSetup}/>}
-      {config&&view==="dash"&&<DashView config={config} logs={logs}/>}
-      {config&&view==="daily"&&<DailyView config={config} logs={logs} onLog={onLog}/>}
-      {config&&view==="history"&&<HistView config={config} logs={logs} onReset={onReset}/>}
-      {config&&(
-        <nav className="nav">
-          {[{id:"dash",l:"Dashboard",i:"◎"},{id:"daily",l:"Today",i:"↻"},{id:"history",l:"History",i:"☰"}].map(t=>(
-            <button key={t.id} className={view===t.id?"active":""} onClick={()=>setView(t.id)}>
-              <span className="nav-icon">{t.i}</span>{t.l}
-            </button>
-          ))}
-        </nav>
-      )}
+  return <div>
+    <div style={{padding:"28px 0 16px"}}>
+      <p className="t3">{new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
+      <p className="t1" style={{marginTop:4}}>Daily Loop</p>
     </div>
-  );
+
+    <div className="card" style={{borderLeft:met?"3px solid #34c759":"3px solid transparent"}}>
+      <div className="row" style={{justifyContent:"space-between",marginBottom:10}}>
+        <span className="t2" style={{fontSize:15}}>Quota</span>
+        <span style={{fontSize:24,fontWeight:700,color:met?"#34c759":"#e8912e"}}>{dn}/{c.dailyQuota}</span>
+      </div>
+      <div className="trk"><div className="trk-fill" style={{width:pct(dn,c.dailyQuota)+"%",background:met?"#34c759":"#e8912e"}}/></div>
+    </div>
+
+    {bl>=5&&<div className="card" style={{borderLeft:"3px solid #ff3b30"}}>
+      <p style={{fontWeight:600,color:"#ff3b30",marginBottom:2}}>⚡ Circuit Breaker</p>
+      <p className="t4">5 blanks. Switch targets or method.</p>
+    </div>}
+
+    <div className="card">
+      <p className="t2" style={{fontSize:15}}>Actions</p>
+      <p className="t4" style={{marginBottom:4}}>Both boxes = counts toward quota</p>
+      {acts.map((a,i)=>(
+        <div key={a.id} className="ai">
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:14,fontWeight:700,color:a.done&&a.quality?"#34c759":"#aeaeb2",minWidth:16}}>{i+1}</span>
+            <span className={a.done&&a.quality?"done":""} style={{flex:1,fontSize:15}}>{a.name}</span>
+          </div>
+          <div className="ac">
+            <label><input type="checkbox" checked={a.done} onChange={()=>{const u=[...acts];u[i]={...u[i],done:!u[i].done};sA(u)}}/>Did it</label>
+            <label><input type="checkbox" checked={a.quality} disabled={!a.done} onChange={()=>{const u=[...acts];u[i]={...u[i],quality:!u[i].quality};sA(u)}} style={{accentColor:"#34c759"}}/>Done right</label>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div className="card">
+      <div className="row" style={{justifyContent:"space-between"}}>
+        <span className="t2" style={{fontSize:15}}>Blanks</span>
+        <div className="row" style={{gap:4}}>
+          <button className="btn-sec" style={{width:40,height:36,padding:0,borderRadius:8,fontSize:18}} onClick={()=>sB(Math.max(0,bl-1))}>−</button>
+          <span style={{fontSize:24,fontWeight:700,minWidth:32,textAlign:"center",color:bl>=5?"#ff3b30":bl>=3?"#e8912e":"#000"}}>{bl}</span>
+          <button className="btn-sec" style={{width:40,height:36,padding:0,borderRadius:8,fontSize:18}} onClick={()=>sB(bl+1)}>+</button>
+        </div>
+      </div>
+      <p className="t4" style={{marginTop:6}}>Zero-signal actions in a row.</p>
+    </div>
+
+    <div className="sep"/>
+
+    <div className="f"><label className="t3" style={{display:"block",marginBottom:6}}>Today's output ({c.metric})</label><input type="number" className="input" value={ov} onChange={e=>sO(e.target.value)} placeholder="Current value"/></div>
+    <div className="f"><label className="t3" style={{display:"block",marginBottom:6}}>Best action today</label><input className="input" value={best} onChange={e=>sBe(e.target.value)} placeholder="What worked?"/></div>
+    <div className="f"><label className="t3" style={{display:"block",marginBottom:6}}>One system improvement</label><input className="input" value={imp} onChange={e=>sI(e.target.value)} placeholder="Template or rule to update"/></div>
+    <div className="f"><label className="t3" style={{display:"block",marginBottom:6}}>Notes</label><textarea className="input" value={notes} onChange={e=>sN(e.target.value)} placeholder="Anything worth capturing..."/></div>
+
+    <button className={"btn"+(saved?" btn-g":"")} onClick={()=>{
+      onLog({date:d,actionsCompleted:dn,actionsTotal:acts.length,outputValue:Number(ov),bestAction:best,improvement:imp,notes,blanks:bl});
+      sS(true);
+    }}>{saved?"✓ Saved — Tap to Update":"Save Today"}</button>
+  </div>;
+}
+
+/* ━━━ HISTORY ━━━ */
+function Hist({config:c,logs,onReset}){
+  const bd=logs.slice(-14).map(l=>({v:l.actionsCompleted}));
+  return <div>
+    <div style={{padding:"28px 0 16px"}}>
+      <p className="t1">History</p>
+      <p className="t3" style={{marginTop:4}}>{logs.length} day{logs.length!==1?"s":""} logged</p>
+    </div>
+
+    {bd.length>1&&<div className="card">
+      <p className="t2" style={{fontSize:15,marginBottom:10}}>Last 14 Days</p>
+      <Bars data={bd} q={c.dailyQuota}/>
+    </div>}
+
+    {c.rules?.filter(r=>r.signal).length>0&&<div className="card">
+      <p className="t2" style={{fontSize:15,marginBottom:8}}>Rules</p>
+      {c.rules.filter(r=>r.signal).map((r,i)=>(
+        <div key={i} style={{padding:"10px 0",borderBottom:"1px solid #f2f2f7",fontSize:14}}>
+          <span style={{fontWeight:600,color:"#e8912e"}}>IF</span>{" "}{r.signal}{" "}<span style={{fontWeight:600,color:"#34c759"}}>→</span>{" "}{r.response}
+        </div>
+      ))}
+    </div>}
+
+    {[...logs].reverse().map((l,i)=>(
+      <div key={i} className="card" style={{padding:14}}>
+        <div className="row" style={{justifyContent:"space-between",marginBottom:6}}>
+          <span style={{fontWeight:600,fontSize:14}}>{l.date}</span>
+          <span className="pill" style={{color:l.actionsCompleted>=c.dailyQuota?"#34c759":"#e8912e",background:(l.actionsCompleted>=c.dailyQuota?"#34c759":"#e8912e")+"12"}}>{l.actionsCompleted}/{l.actionsTotal}</span>
+        </div>
+        <p style={{fontSize:14,color:"#8e8e93"}}>{c.metric}: <span style={{color:"#1c1c1e",fontWeight:600}}>{l.outputValue}</span>{l.bestAction&&<span> · {l.bestAction}</span>}</p>
+        {l.improvement&&<p style={{fontSize:13,color:"#34c759",marginTop:4}}>↑ {l.improvement}</p>}
+      </div>
+    ))}
+    {!logs.length&&<p style={{color:"#aeaeb2",textAlign:"center",padding:40}}>No logs yet.</p>}
+
+    <div className="sep"/>
+    <button className="btn-sec" style={{width:"100%",color:"#ff3b30"}} onClick={onReset}>Reset Machine</button>
+  </div>;
+}
+
+/* ━━━ APP ━━━ */
+function App(){
+  const[ld,sL]=useState(true);
+  const[cfg,sC]=useState(null);
+  const[logs,sLg]=useState([]);
+  const[v,sV]=useState("setup");
+
+  useEffect(()=>{const d=db.load();if(d?.config){sC(d.config);sLg(d.logs||[]);sV("dash")}sL(false)},[]);
+  const p=(c,l)=>db.save({config:c,logs:l});
+
+  if(ld)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",color:"#aeaeb2"}}>Loading…</div>;
+
+  return <div>
+    {!cfg&&<Setup onSave={c=>{sC(c);sLg([]);p(c,[]);sV("dash")}}/>}
+    {cfg&&v==="dash"&&<Dash config={cfg} logs={logs}/>}
+    {cfg&&v==="daily"&&<Daily config={cfg} logs={logs} onLog={l=>{const u=[...logs.filter(x=>x.date!==l.date),l].sort((a,b)=>a.date.localeCompare(b.date));sLg(u);p(cfg,u)}}/>}
+    {cfg&&v==="history"&&<Hist config={cfg} logs={logs} onReset={()=>{if(confirm("Erase goal and all logs?")){sC(null);sLg([]);sV("setup");db.save({config:null,logs:[]})}}}/>}
+    {cfg&&<nav className="nav">
+      {[{id:"dash",l:"Dashboard",i:"◎"},{id:"daily",l:"Today",i:"↻"},{id:"history",l:"History",i:"☰"}].map(t=>(
+        <button key={t.id} className={v===t.id?"on":""} onClick={()=>sV(t.id)}>
+          <span className="ni">{t.i}</span>{t.l}
+        </button>
+      ))}
+    </nav>}
+  </div>;
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
