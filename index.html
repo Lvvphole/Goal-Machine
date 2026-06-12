@@ -15,7 +15,7 @@ html{
   background:#f2f2f7;
   color:#1c1c1e;
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',system-ui,sans-serif;
-  font-size:15px;line-height:1.5;
+  font-size:15px;line-height:1.5;font-weight:500;
   -webkit-font-smoothing:antialiased;
   -webkit-text-size-adjust:100%
 }
@@ -53,10 +53,10 @@ input[type="number"].input{height:50px;line-height:50px}
 }
 .btn-sec:active{background:#f2f2f7}
 
-.t1{font-size:28px;font-weight:700;letter-spacing:-.02em;color:#000;line-height:1.15}
-.t2{font-size:17px;font-weight:600;color:#000}
+.t1{font-size:28px;font-weight:800;letter-spacing:-.02em;color:#000;line-height:1.15}
+.t2{font-size:17px;font-weight:700;color:#000}
 .t3{font-size:13px;font-weight:600;color:#48484a}
-.t4{font-size:13px;color:#6c6c70;line-height:1.5}
+.t4{font-size:13px;font-weight:500;color:#6c6c70;line-height:1.5}
 .accent{color:#e8912e}
 
 .f{margin-bottom:16px}
@@ -90,7 +90,7 @@ input[type="checkbox"]{width:22px;height:22px;accent-color:#e8912e;cursor:pointe
 .ai{padding:14px 0}
 .ai+.ai{border-top:1px solid #f2f2f7}
 .ac{display:flex;gap:16px;padding-left:28px;margin-top:8px}
-.ac label{display:flex;align-items:center;gap:8px;font-size:14px;color:#48484a;cursor:pointer;user-select:none}
+.ac label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#48484a;cursor:pointer;user-select:none}
 .done{opacity:.3;text-decoration:line-through}
 .pill{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;display:inline-block}
 
@@ -177,7 +177,7 @@ function Check({label,checked,onToggle}){
     <div className={"gate-box"+(checked?" checked":"")}>
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7.5L5.5 10L11 4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
     </div>
-    <span style={{fontSize:15,color:checked?"#1c1c1e":"#636366",transition:"color .15s"}}>{label}</span>
+    <span style={{fontSize:15,fontWeight:500,color:checked?"#1c1c1e":"#636366",transition:"color .15s"}}>{label}</span>
   </div>;
 }
 
@@ -201,7 +201,7 @@ function Setup({onSave}){
   return <div>
     <div style={{padding:"32px 0 20px"}}>
       <p className="t1" style={{fontSize:32}}>Goal Machine</p>
-      <p style={{color:"#48484a",marginTop:8,fontSize:15,lineHeight:1.6}}>Replace willpower with structure. Plug in a goal — the system handles feedback, correction, and daily execution.</p>
+      <p style={{color:"#48484a",marginTop:8,fontSize:15,fontWeight:500,lineHeight:1.6}}>Replace willpower with structure. Plug in a goal — the system handles feedback, correction, and daily execution.</p>
     </div>
 
     <button onClick={()=>sF(ex)} className="btn-sec" style={{width:"100%",marginBottom:14,borderStyle:"dashed"}}>Load an example</button>
@@ -357,7 +357,7 @@ function Dash({config:c,logs}){
       {c.actions.filter(a=>a.name).map((a,i)=>(
         <div key={a.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:i<c.actions.filter(a=>a.name).length-1?"1px solid #f2f2f7":"none"}}>
           <span style={{fontSize:13,fontWeight:700,color:i===0?"#e8912e":"#86868b",minWidth:16}}>{i+1}</span>
-          <span style={{fontSize:15}}>{a.name}</span>
+          <span style={{fontSize:15,fontWeight:500}}>{a.name}</span>
         </div>
       ))}
     </div>
@@ -404,7 +404,7 @@ function Daily({config:c,logs,onLog}){
         <div key={a.id} className="ai">
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:14,fontWeight:700,color:a.done&&a.quality?"#34c759":"#86868b",minWidth:16}}>{i+1}</span>
-            <span className={a.done&&a.quality?"done":""} style={{flex:1,fontSize:15}}>{a.name}</span>
+            <span className={a.done&&a.quality?"done":""} style={{flex:1,fontSize:15,fontWeight:500}}>{a.name}</span>
           </div>
           <div className="ac">
             <label><input type="checkbox" checked={a.done} onChange={()=>{const u=[...acts];u[i]={...u[i],done:!u[i].done};sA(u)}}/>Did it</label>
