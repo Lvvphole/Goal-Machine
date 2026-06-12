@@ -183,10 +183,10 @@ function Check({label,checked,onToggle}){
 
 /* ━━━ SETUP ━━━ */
 function Setup({onSave}){
-  const def={goal:"",deadline:"",metric:"",targetValue:"",currentValue:"0",dailyQuota:"",actions:[{id:1,name:""}],rules:[{signal:"",response:""}]};
-  const ex={goal:"Lose 20 pounds",deadline:new Date(Date.now()+90*864e5).toISOString().slice(0,10),metric:"Scale weight (lbs)",targetValue:"180",currentValue:"200",dailyQuota:"4",actions:[{id:1,name:"Hit calorie target (under 2000)"},{id:2,name:"30 min workout"},{id:3,name:"10,000 steps"},{id:4,name:"Log all meals"}],rules:[{signal:"I miss a workout",response:"Do 15 min bodyweight — something beats nothing"},{signal:"Weight stalls 2 weeks",response:"Cut 200 cal or add one extra walk/day"}]};
+  const def={goal:"",deadline:"",metric:"",targetValue:"",currentValue:"0",dailyQuota:"",actions:[{id:1,name:""}],rules:[{signal:"",response:""}],precommit:"",referee:"",firstWin:""};
+  const ex={goal:"Lose 20 pounds",deadline:new Date(Date.now()+90*864e5).toISOString().slice(0,10),metric:"Scale weight (lbs)",targetValue:"180",currentValue:"200",dailyQuota:"4",actions:[{id:1,name:"Hit calorie target (under 2000)"},{id:2,name:"30 min workout"},{id:3,name:"10,000 steps"},{id:4,name:"Log all meals"}],rules:[{signal:"I miss a workout",response:"Do 15 min bodyweight — something beats nothing"},{signal:"Weight stalls 2 weeks",response:"Cut 200 cal or add one extra walk/day"}],precommit:"Told my brother I'd pay him $200 if I quit",referee:"Brother — checks my weekly weigh-in photo",firstWin:"Track calories for 2 days straight"};
   const[f,sF]=useState(def);
-  const[gates,sG]=useState([false,false,false]);
+  const[gates,sG]=useState([false,false,false,false]);
   const u=(k,v)=>sF(p=>({...p,[k]:v}));
   const uA=(i,v)=>{const a=[...f.actions];a[i]={...a[i],name:v};u("actions",a)};
   const aA=()=>u("actions",[...f.actions,{id:Date.now(),name:""}]);
@@ -208,10 +208,11 @@ function Setup({onSave}){
 
     <div className="card">
       <p className="t2" style={{fontSize:15,marginBottom:4}}>Before you start</p>
-      <p className="t4" style={{marginBottom:8}}>Check all three or the machine won't activate.</p>
+      <p className="t4" style={{marginBottom:8}}>Check all four or the machine won't activate.</p>
       <Check label="I can measure the result with a number" checked={gates[0]} onToggle={()=>toggleGate(0)}/>
       <Check label="People actually succeed doing it this way" checked={gates[1]} onToggle={()=>toggleGate(1)}/>
       <Check label="I can act on it every single day" checked={gates[2]} onToggle={()=>toggleGate(2)}/>
+      <Check label="This is my only primary goal right now" checked={gates[3]} onToggle={()=>toggleGate(3)}/>
     </div>
 
     <div className="gap"/>
@@ -284,9 +285,29 @@ function Setup({onSave}){
       <button onClick={aR} className="btn-sec" style={{width:"100%",height:38,fontSize:13}}>+ Add rule</button>
     </div>
 
+    <div className="card">
+      <p className="accent" style={{fontSize:14,fontWeight:700,marginBottom:4}}>Guardrails</p>
+      <p className="t4" style={{marginBottom:12}}>Lock yourself in. Future-you will want to quit — make quitting harder than continuing.</p>
+      <div className="f">
+        <label className="t3" style={{display:"block",marginBottom:6}}>What's at stake if you quit?</label>
+        <input className="input" placeholder="I told my partner I'd pay $200 if I stop" value={f.precommit} onChange={e=>u("precommit",e.target.value)}/>
+        <p className="t4" style={{marginTop:6}}>Public commitment, money on the line, or a promise to someone.</p>
+      </div>
+      <div className="f">
+        <label className="t3" style={{display:"block",marginBottom:6}}>Who checks your numbers?</label>
+        <input className="input" placeholder="My brother — sees my weekly data" value={f.referee} onChange={e=>u("referee",e.target.value)}/>
+        <p className="t4" style={{marginTop:6}}>Someone with access to your real results, not just "how's it going."</p>
+      </div>
+      <div>
+        <label className="t3" style={{display:"block",marginBottom:6}}>First win in 48 hours</label>
+        <input className="input" placeholder="Track calories for 2 days straight" value={f.firstWin} onChange={e=>u("firstWin",e.target.value)}/>
+        <p className="t4" style={{marginTop:6}}>A small proof the system works — within 48 hours of starting. Builds belief.</p>
+      </div>
+    </div>
+
     <div className="gap"/>
     <button className="btn" disabled={!ok} onClick={()=>ok&&onSave({...f,targetValue:Number(f.targetValue),currentValue:Number(f.currentValue),dailyQuota:Number(f.dailyQuota),createdAt:td()})}>Activate Machine</button>
-    {!allGates&&<p style={{textAlign:"center",fontSize:13,color:"#6c6c70",marginTop:10}}>Check all three gates above to activate.</p>}
+    {!allGates&&<p style={{textAlign:"center",fontSize:13,color:"#6c6c70",marginTop:10}}>Check all four gates above to activate.</p>}
     <p style={{textAlign:"center",fontSize:12,color:"#86868b",marginTop:8}}>Data stays on your device.</p>
   </div>;
 }
@@ -361,6 +382,60 @@ function Dash({config:c,logs}){
         </div>
       ))}
     </div>
+
+    {/* ── WEEKLY EVAL ── */}
+    {(()=>{
+      if(logs.length<7)return null;
+      const weeks=[];
+      for(let i=0;i<Math.min(4,Math.floor(logs.length/7));i++){
+        const wk=logs.slice(logs.length-7*(i+1),logs.length-7*i);
+        const rate=wk.length?Math.round(wk.reduce((s,l)=>s+l.actionsCompleted,0)/wk.reduce((s,l)=>s+l.actionsTotal,0)*100):0;
+        const avgOut=wk.length?Math.round(wk.reduce((s,l)=>s+l.outputValue,0)/wk.length*10)/10:0;
+        weeks.unshift({rate,avgOut,n:i+1});
+      }
+      const flat=weeks.length>=3&&Math.abs(weeks[weeks.length-1].rate-weeks[weeks.length-3].rate)<=3;
+      const actionsOnTarget=weeks.length>0&&weeks[weeks.length-1].rate>=80;
+      const goalFlat=weeks.length>=3&&Math.abs(weeks[weeks.length-1].avgOut-weeks[weeks.length-3].avgOut)<=1;
+      const lgBroken=actionsOnTarget&&goalFlat&&weeks.length>=3;
+
+      return <div>
+        <div className="card">
+          <p className="t2" style={{fontSize:15,marginBottom:8}}>Weekly Eval</p>
+          <p className="t4" style={{marginBottom:10}}>Same effort → better results? System improving or just lucky?</p>
+          <div style={{display:"flex",gap:6}}>
+            {weeks.map((w,i)=>(
+              <div key={i} style={{flex:1,textAlign:"center",padding:"8px 4px",background:"#f2f2f7",borderRadius:8}}>
+                <p style={{fontSize:18,fontWeight:700,color:w.rate>=80?"#34c759":w.rate>=50?"#e8912e":"#ff3b30"}}>{w.rate}%</p>
+                <p style={{fontSize:11,color:"#636366",marginTop:2}}>Wk {w.n}</p>
+              </div>
+            ))}
+          </div>
+          {flat&&weeks.length>=3&&<div style={{marginTop:10,padding:10,background:"#fff3e0",borderRadius:8}}>
+            <p style={{fontSize:13,fontWeight:600,color:"#e8912e"}}>⚠ System flatline — 3 weeks with no improvement. Time for an architectural change, not more reps.</p>
+          </div>}
+        </div>
+
+        {/* ── STOP CONDITION ALERTS ── */}
+        {lgBroken&&<div className="card" style={{borderLeft:"3px solid #ff3b30"}}>
+          <p style={{fontWeight:700,color:"#ff3b30",marginBottom:4}}>Stop Condition: L→G Broken</p>
+          <p className="t4">Your daily actions are on target but the goal isn't moving. The connection between what you're doing and the result is broken. Return to setup and rebuild the action plan — don't add more effort to a broken link.</p>
+        </div>}
+      </div>;
+    })()}
+
+    {/* ── GOAL HIT ── */}
+    {pp>=100&&<div className="card" style={{borderLeft:"3px solid #34c759",background:"#f0faf4"}}>
+      <p style={{fontWeight:700,color:"#34c759",fontSize:17,marginBottom:4}}>✓ Goal Achieved</p>
+      <p className="t4">Save this system as a template. Apply the same structure to your next goal.</p>
+    </div>}
+
+    {/* ── GUARDRAILS REMINDER ── */}
+    {c.precommit&&<div className="card">
+      <p className="t2" style={{fontSize:15,marginBottom:8}}>Guardrails</p>
+      {c.precommit&&<p style={{fontSize:13,color:"#48484a",marginBottom:6}}>🔒 <span style={{fontWeight:600}}>At stake:</span> {c.precommit}</p>}
+      {c.referee&&<p style={{fontSize:13,color:"#48484a",marginBottom:6}}>👁 <span style={{fontWeight:600}}>Referee:</span> {c.referee}</p>}
+      {c.firstWin&&<p style={{fontSize:13,color:"#48484a"}}>⚡ <span style={{fontWeight:600}}>First win:</span> {c.firstWin}</p>}
+    </div>}
   </div>;
 }
 
@@ -384,6 +459,11 @@ function Daily({config:c,logs,onLog}){
       <p className="t1" style={{marginTop:4}}>Daily Loop</p>
     </div>
 
+    <div className="card" style={{background:"#fff8f0",borderLeft:"3px solid #e8912e"}}>
+      <p style={{fontSize:13,fontWeight:600,color:"#e8912e",marginBottom:2}}>Re-sort before you start</p>
+      <p className="t4">Who is closest to yes today? Any new signals overnight? Work the hottest target first — yesterday's order may be wrong today.</p>
+    </div>
+
     <div className="card" style={{borderLeft:met?"3px solid #34c759":"3px solid transparent"}}>
       <div className="row" style={{justifyContent:"space-between",marginBottom:10}}>
         <span className="t2" style={{fontSize:15}}>Quota</span>
@@ -393,8 +473,14 @@ function Daily({config:c,logs,onLog}){
     </div>
 
     {bl>=5&&<div className="card" style={{borderLeft:"3px solid #ff3b30"}}>
-      <p style={{fontWeight:600,color:"#ff3b30",marginBottom:2}}>⚡ Circuit Breaker</p>
-      <p className="t4">5 blanks. Switch targets or method.</p>
+      <p style={{fontWeight:600,color:"#ff3b30",marginBottom:4}}>⚡ Circuit Breaker</p>
+      <p className="t4" style={{marginBottom:8}}>5 blanks. Don't repeat the same approach — each retry must change something:</p>
+      <p style={{fontSize:13,color:"#48484a",lineHeight:1.6}}>
+        <span style={{fontWeight:700}}>Retry 1:</span> Different channel (call → email → in person)<br/>
+        <span style={{fontWeight:700}}>Retry 2:</span> Different message or value prop<br/>
+        <span style={{fontWeight:700}}>Retry 3:</span> Different entry point or contact<br/>
+        <span style={{fontWeight:700}}>Retry 4:</span> Set aside — move energy to next layer
+      </p>
     </div>}
 
     <div className="card">
@@ -431,7 +517,7 @@ function Daily({config:c,logs,onLog}){
     <div className="f"><label className="t3" style={{display:"block",marginBottom:6}}>Today's output ({c.metric})</label><input type="number" className="input" value={ov} onChange={e=>sO(e.target.value)} placeholder="Current value"/></div>
     <div className="f"><label className="t3" style={{display:"block",marginBottom:6}}>Best action today</label><input className="input" value={best} onChange={e=>sBe(e.target.value)} placeholder="What worked?"/></div>
     <div className="f"><label className="t3" style={{display:"block",marginBottom:6}}>One system improvement</label><input className="input" value={imp} onChange={e=>sI(e.target.value)} placeholder="Template or rule to update"/></div>
-    <div className="f"><label className="t3" style={{display:"block",marginBottom:6}}>Notes</label><textarea className="input" value={notes} onChange={e=>sN(e.target.value)} placeholder="Anything worth capturing..."/></div>
+    <div className="f"><label className="t3" style={{display:"block",marginBottom:6}}>What did you change today?</label><input className="input" value={notes} onChange={e=>sN(e.target.value)} placeholder="New approach, different target, adjusted method..."/><p className="t4" style={{marginTop:6}}>Track one change per day max. If nothing was behind, write "stayed the course."</p></div>
 
     <button className={"btn"+(saved?" btn-g":"")} onClick={()=>{
       onLog({date:d,actionsCompleted:dn,actionsTotal:acts.length,outputValue:Number(ov),bestAction:best,improvement:imp,notes,blanks:bl});
