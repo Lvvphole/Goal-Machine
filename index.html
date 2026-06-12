@@ -31,7 +31,7 @@ input,textarea,button{font-family:inherit}
   outline:none;-webkit-appearance:none;appearance:none
 }
 .input:focus{box-shadow:0 0 0 2px #e8912e40}
-.input::placeholder{color:#aeaeb2}
+.input::placeholder{color:#86868b}
 textarea.input{height:auto;min-height:80px;padding:12px 14px;line-height:1.4;resize:vertical}
 input[type="date"].input{height:50px;line-height:50px;min-height:50px}
 input[type="date"]::-webkit-calendar-picker-indicator{opacity:.5}
@@ -55,8 +55,8 @@ input[type="number"].input{height:50px;line-height:50px}
 
 .t1{font-size:28px;font-weight:700;letter-spacing:-.02em;color:#000;line-height:1.15}
 .t2{font-size:17px;font-weight:600;color:#000}
-.t3{font-size:13px;font-weight:500;color:#8e8e93}
-.t4{font-size:13px;color:#aeaeb2;line-height:1.5}
+.t3{font-size:13px;font-weight:600;color:#48484a}
+.t4{font-size:13px;color:#6c6c70;line-height:1.5}
 .accent{color:#e8912e}
 
 .f{margin-bottom:16px}
@@ -74,7 +74,7 @@ input[type="number"].input{height:50px;line-height:50px}
 }
 .nav button{
   flex:1;padding:8px 0 6px;background:transparent;border:none;
-  color:#8e8e93;font-size:10px;font-weight:500;cursor:pointer;text-align:center
+  color:#48484a;font-size:10px;font-weight:500;cursor:pointer;text-align:center
 }
 .nav button.on{color:#e8912e}
 .ni{font-size:22px;display:block;line-height:1;margin-bottom:1px}
@@ -84,13 +84,13 @@ input[type="number"].input{height:50px;line-height:50px}
 
 .sbox{flex:1;text-align:center;padding:14px 4px}
 .sv{font-size:24px;font-weight:700;letter-spacing:-.02em;color:#000}
-.sl{font-size:11px;color:#8e8e93;font-weight:500;margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+.sl{font-size:11px;color:#636366;font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
 
 input[type="checkbox"]{width:22px;height:22px;accent-color:#e8912e;cursor:pointer;border-radius:6px}
 .ai{padding:14px 0}
 .ai+.ai{border-top:1px solid #f2f2f7}
 .ac{display:flex;gap:16px;padding-left:28px;margin-top:8px}
-.ac label{display:flex;align-items:center;gap:8px;font-size:14px;color:#8e8e93;cursor:pointer;user-select:none}
+.ac label{display:flex;align-items:center;gap:8px;font-size:14px;color:#48484a;cursor:pointer;user-select:none}
 .done{opacity:.3;text-decoration:line-through}
 .pill{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;display:inline-block}
 
@@ -166,7 +166,7 @@ function Gauge({g}){
     <div style={{background:"#f2f2f7",height:6,borderRadius:3,overflow:"hidden"}}>
       <div style={{height:"100%",borderRadius:3,width:Math.min(100,Math.max(5,g))+"%",background:c,transition:"width .4s"}}/>
     </div>
-    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#aeaeb2",marginTop:8}}>
+    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#6c6c70",marginTop:8}}>
       <span>Fine-tune</span><span>Adjust</span><span>Rebuild</span>
     </div>
   </div>;
@@ -177,7 +177,7 @@ function Check({label,checked,onToggle}){
     <div className={"gate-box"+(checked?" checked":"")}>
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7.5L5.5 10L11 4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
     </div>
-    <span style={{fontSize:15,color:checked?"#1c1c1e":"#8e8e93",transition:"color .15s"}}>{label}</span>
+    <span style={{fontSize:15,color:checked?"#1c1c1e":"#636366",transition:"color .15s"}}>{label}</span>
   </div>;
 }
 
@@ -201,7 +201,7 @@ function Setup({onSave}){
   return <div>
     <div style={{padding:"32px 0 20px"}}>
       <p className="t1" style={{fontSize:32}}>Goal Machine</p>
-      <p style={{color:"#8e8e93",marginTop:8,fontSize:15,lineHeight:1.6}}>Replace willpower with structure. Plug in a goal — the system handles feedback, correction, and daily execution.</p>
+      <p style={{color:"#48484a",marginTop:8,fontSize:15,lineHeight:1.6}}>Replace willpower with structure. Plug in a goal — the system handles feedback, correction, and daily execution.</p>
     </div>
 
     <button onClick={()=>sF(ex)} className="btn-sec" style={{width:"100%",marginBottom:14,borderStyle:"dashed"}}>Load an example</button>
@@ -257,7 +257,7 @@ function Setup({onSave}){
         return <div key={a.id} style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
           <span style={{fontSize:14,fontWeight:700,color:"#e8912e",minWidth:16,textAlign:"center"}}>{i+1}</span>
           <input className="input" style={{flex:1,height:44}} placeholder={ph[i]||"Action "+(i+1)} value={a.name} onChange={e=>uA(i,e.target.value)}/>
-          {f.actions.length>1&&<button onClick={()=>rA(i)} style={{background:"none",border:"none",color:"#aeaeb2",cursor:"pointer",fontSize:22,padding:"0 4px"}}>×</button>}
+          {f.actions.length>1&&<button onClick={()=>rA(i)} style={{background:"none",border:"none",color:"#6c6c70",cursor:"pointer",fontSize:22,padding:"0 4px"}}>×</button>}
         </div>;
       })}
       <button onClick={aA} className="btn-sec" style={{width:"100%",marginTop:4,height:38,fontSize:13}}>+ Add action</button>
@@ -273,7 +273,7 @@ function Setup({onSave}){
           <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:6}}>
             <span style={{fontSize:13,fontWeight:700,color:"#e8912e",minWidth:36}}>IF</span>
             <input className="input" style={{flex:1,height:44,fontSize:14}} placeholder={sp[i]||"something goes wrong..."} value={r.signal} onChange={e=>uR(i,"signal",e.target.value)}/>
-            {f.rules.length>1&&<button onClick={()=>rR(i)} style={{background:"none",border:"none",color:"#aeaeb2",cursor:"pointer",fontSize:22}}>×</button>}
+            {f.rules.length>1&&<button onClick={()=>rR(i)} style={{background:"none",border:"none",color:"#6c6c70",cursor:"pointer",fontSize:22}}>×</button>}
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             <span style={{fontSize:13,fontWeight:700,color:"#34c759",minWidth:36}}>THEN</span>
@@ -286,8 +286,8 @@ function Setup({onSave}){
 
     <div className="gap"/>
     <button className="btn" disabled={!ok} onClick={()=>ok&&onSave({...f,targetValue:Number(f.targetValue),currentValue:Number(f.currentValue),dailyQuota:Number(f.dailyQuota),createdAt:td()})}>Activate Machine</button>
-    {!allGates&&<p style={{textAlign:"center",fontSize:13,color:"#aeaeb2",marginTop:10}}>Check all three gates above to activate.</p>}
-    <p style={{textAlign:"center",fontSize:12,color:"#c7c7cc",marginTop:8}}>Data stays on your device.</p>
+    {!allGates&&<p style={{textAlign:"center",fontSize:13,color:"#6c6c70",marginTop:10}}>Check all three gates above to activate.</p>}
+    <p style={{textAlign:"center",fontSize:12,color:"#86868b",marginTop:8}}>Data stays on your device.</p>
   </div>;
 }
 
@@ -331,7 +331,7 @@ function Dash({config:c,logs}){
         </div>
         <div>
           <p className="t3">Streak</p>
-          <p style={{fontSize:28,fontWeight:700,color:sk>=3?"#34c759":"#000",marginTop:2}}>{sk}<span style={{fontSize:15,fontWeight:500,color:"#8e8e93",marginLeft:4}}>day{sk!==1?"s":""}</span></p>
+          <p style={{fontSize:28,fontWeight:700,color:sk>=3?"#34c759":"#000",marginTop:2}}>{sk}<span style={{fontSize:15,fontWeight:500,color:"#48484a",marginLeft:4}}>day{sk!==1?"s":""}</span></p>
         </div>
       </div>
     </div>
@@ -347,7 +347,7 @@ function Dash({config:c,logs}){
     {cd.length>1&&<div className="card">
       <p className="t2" style={{fontSize:15,marginBottom:10}}>Trend</p>
       <Trend data={cd}/>
-      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#aeaeb2",marginTop:8}}>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#6c6c70",marginTop:8}}>
         <span>Day 1</span><span>Day {cd.length}</span>
       </div>
     </div>}
@@ -356,7 +356,7 @@ function Dash({config:c,logs}){
       <p className="t2" style={{fontSize:15,marginBottom:8}}>Priority Stack</p>
       {c.actions.filter(a=>a.name).map((a,i)=>(
         <div key={a.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:i<c.actions.filter(a=>a.name).length-1?"1px solid #f2f2f7":"none"}}>
-          <span style={{fontSize:13,fontWeight:700,color:i===0?"#e8912e":"#aeaeb2",minWidth:16}}>{i+1}</span>
+          <span style={{fontSize:13,fontWeight:700,color:i===0?"#e8912e":"#86868b",minWidth:16}}>{i+1}</span>
           <span style={{fontSize:15}}>{a.name}</span>
         </div>
       ))}
@@ -403,7 +403,7 @@ function Daily({config:c,logs,onLog}){
       {acts.map((a,i)=>(
         <div key={a.id} className="ai">
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:14,fontWeight:700,color:a.done&&a.quality?"#34c759":"#aeaeb2",minWidth:16}}>{i+1}</span>
+            <span style={{fontSize:14,fontWeight:700,color:a.done&&a.quality?"#34c759":"#86868b",minWidth:16}}>{i+1}</span>
             <span className={a.done&&a.quality?"done":""} style={{flex:1,fontSize:15}}>{a.name}</span>
           </div>
           <div className="ac">
@@ -469,11 +469,11 @@ function Hist({config:c,logs,onReset}){
           <span style={{fontWeight:600,fontSize:14}}>{l.date}</span>
           <span className="pill" style={{color:l.actionsCompleted>=c.dailyQuota?"#34c759":"#e8912e",background:(l.actionsCompleted>=c.dailyQuota?"#34c759":"#e8912e")+"12"}}>{l.actionsCompleted}/{l.actionsTotal}</span>
         </div>
-        <p style={{fontSize:14,color:"#8e8e93"}}>{c.metric}: <span style={{color:"#1c1c1e",fontWeight:600}}>{l.outputValue}</span>{l.bestAction&&<span> · {l.bestAction}</span>}</p>
+        <p style={{fontSize:14,color:"#48484a"}}>{c.metric}: <span style={{color:"#1c1c1e",fontWeight:600}}>{l.outputValue}</span>{l.bestAction&&<span> · {l.bestAction}</span>}</p>
         {l.improvement&&<p style={{fontSize:13,color:"#34c759",marginTop:4}}>↑ {l.improvement}</p>}
       </div>
     ))}
-    {!logs.length&&<p style={{color:"#aeaeb2",textAlign:"center",padding:40}}>No logs yet.</p>}
+    {!logs.length&&<p style={{color:"#6c6c70",textAlign:"center",padding:40}}>No logs yet.</p>}
 
     <div className="sep"/>
     <button className="btn-sec" style={{width:"100%",color:"#ff3b30"}} onClick={onReset}>Reset Machine</button>
@@ -490,7 +490,7 @@ function App(){
   useEffect(()=>{const d=db.load();if(d?.config){sC(d.config);sLg(d.logs||[]);sV("dash")}sL(false)},[]);
   const p=(c,l)=>db.save({config:c,logs:l});
 
-  if(ld)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",color:"#aeaeb2"}}>Loading…</div>;
+  if(ld)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",color:"#6c6c70"}}>Loading…</div>;
 
   return <div>
     {!cfg&&<Setup onSave={c=>{sC(c);sLg([]);p(c,[]);sV("dash")}}/>}
