@@ -201,7 +201,7 @@ function Setup({onSave}){
   return <div>
     <div style={{padding:"32px 0 20px"}}>
       <p className="t1" style={{fontSize:32}}>Goal Machine</p>
-      <p style={{color:"#48484a",marginTop:8,fontSize:15,fontWeight:500,lineHeight:1.6}}>Replace will-power with structure. Plug in a goal — the system handles feedback, correction, and daily execution.</p>
+      <p style={{color:"#48484a",marginTop:8,fontSize:15,fontWeight:500,lineHeight:1.6}}>Replace will-power with structure. Plug in a goal and the system handles feedback, correction, and daily execution.</p>
       <a href="https://github.com/Lvvphole/Goal-Machine/blob/main/README.md" target="_blank" rel="noopener" style={{display:"inline-block",marginTop:10,fontSize:14,fontWeight:600,color:"#e8912e",textDecoration:"none"}}>How it works →</a>
     </div>
 
@@ -222,7 +222,7 @@ function Setup({onSave}){
       <p className="accent" style={{fontSize:14,fontWeight:700,marginBottom:16}}>Define Your Goal</p>
 
       <div className="f">
-        <label className="t3" style={{display:"block",marginBottom:6}}>I will achieve</label>
+        <label className="t3" style={{display:"block",marginBottom:6}}>I will:</label>
         <input className="input" placeholder="Lose 20 lbs, Save $5K, Pass AWS exam" value={f.goal} onChange={e=>u("goal",e.target.value)}/>
       </div>
       <div className="f">
