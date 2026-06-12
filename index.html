@@ -202,6 +202,7 @@ function Setup({onSave}){
     <div style={{padding:"32px 0 20px"}}>
       <p className="t1" style={{fontSize:32}}>Goal Machine</p>
       <p style={{color:"#48484a",marginTop:8,fontSize:15,fontWeight:500,lineHeight:1.6}}>Replace willpower with structure. Plug in a goal — the system handles feedback, correction, and daily execution.</p>
+      <a href="https://github.com/Lvvphole/Goal-Machine/blob/main/README.md" target="_blank" rel="noopener" style={{display:"inline-block",marginTop:10,fontSize:14,fontWeight:600,color:"#e8912e",textDecoration:"none"}}>How it works →</a>
     </div>
 
     <button onClick={()=>sF(ex)} className="btn-sec" style={{width:"100%",marginBottom:14,borderStyle:"dashed"}}>Load an example</button>
@@ -265,7 +266,7 @@ function Setup({onSave}){
     </div>
 
     <div className="card">
-      <p className="accent" style={{fontSize:14,fontWeight:700,marginBottom:4}}>If-Then Rules</p>
+      <p className="accent" style={{fontSize:14,fontWeight:700,marginBottom:4}}>Backup Plans</p>
       <p className="t4" style={{marginBottom:12}}>Pre-decide what you'll do when things go wrong.</p>
       {f.rules.map((r,i)=>{
         const sp=["I skip a day","No results after 2 weeks"];
@@ -286,7 +287,7 @@ function Setup({onSave}){
     </div>
 
     <div className="card">
-      <p className="accent" style={{fontSize:14,fontWeight:700,marginBottom:4}}>Guardrails</p>
+      <p className="accent" style={{fontSize:14,fontWeight:700,marginBottom:4}}>Accountability</p>
       <p className="t4" style={{marginBottom:12}}>Lock yourself in. Future-you will want to quit — make quitting harder than continuing.</p>
       <div className="f">
         <label className="t3" style={{display:"block",marginBottom:6}}>What's at stake if you quit?</label>
@@ -431,7 +432,7 @@ function Dash({config:c,logs}){
 
     {/* ── GUARDRAILS REMINDER ── */}
     {c.precommit&&<div className="card">
-      <p className="t2" style={{fontSize:15,marginBottom:8}}>Guardrails</p>
+      <p className="t2" style={{fontSize:15,marginBottom:8}}>Accountability</p>
       {c.precommit&&<p style={{fontSize:13,color:"#48484a",marginBottom:6}}>🔒 <span style={{fontWeight:600}}>At stake:</span> {c.precommit}</p>}
       {c.referee&&<p style={{fontSize:13,color:"#48484a",marginBottom:6}}>👁 <span style={{fontWeight:600}}>Referee:</span> {c.referee}</p>}
       {c.firstWin&&<p style={{fontSize:13,color:"#48484a"}}>⚡ <span style={{fontWeight:600}}>First win:</span> {c.firstWin}</p>}
@@ -474,7 +475,7 @@ function Daily({config:c,logs,onLog}){
 
     {bl>=5&&<div className="card" style={{borderLeft:"3px solid #ff3b30"}}>
       <p style={{fontWeight:600,color:"#ff3b30",marginBottom:4}}>⚡ Circuit Breaker</p>
-      <p className="t4" style={{marginBottom:8}}>5 blanks. Don't repeat the same approach — each retry must change something:</p>
+      <p className="t4" style={{marginBottom:8}}>5 attempts with no response. Don't repeat the same approach — each retry must change something:</p>
       <p style={{fontSize:13,color:"#48484a",lineHeight:1.6}}>
         <span style={{fontWeight:700}}>Retry 1:</span> Different channel (call → email → in person)<br/>
         <span style={{fontWeight:700}}>Retry 2:</span> Different message or value prop<br/>
@@ -502,14 +503,14 @@ function Daily({config:c,logs,onLog}){
 
     <div className="card">
       <div className="row" style={{justifyContent:"space-between"}}>
-        <span className="t2" style={{fontSize:15}}>Blanks</span>
+        <span className="t2" style={{fontSize:15}}>No Response</span>
         <div className="row" style={{gap:4}}>
           <button className="btn-sec" style={{width:40,height:36,padding:0,borderRadius:8,fontSize:18}} onClick={()=>sB(Math.max(0,bl-1))}>−</button>
           <span style={{fontSize:24,fontWeight:700,minWidth:32,textAlign:"center",color:bl>=5?"#ff3b30":bl>=3?"#e8912e":"#000"}}>{bl}</span>
           <button className="btn-sec" style={{width:40,height:36,padding:0,borderRadius:8,fontSize:18}} onClick={()=>sB(bl+1)}>+</button>
         </div>
       </div>
-      <p className="t4" style={{marginTop:6}}>Zero-signal actions in a row.</p>
+      <p className="t4" style={{marginTop:6}}>Actions in a row with no result. Reset to 0 when you get a response.</p>
     </div>
 
     <div className="sep"/>
@@ -541,7 +542,7 @@ function Hist({config:c,logs,onReset}){
     </div>}
 
     {c.rules?.filter(r=>r.signal).length>0&&<div className="card">
-      <p className="t2" style={{fontSize:15,marginBottom:8}}>Rules</p>
+      <p className="t2" style={{fontSize:15,marginBottom:8}}>Backup Plans</p>
       {c.rules.filter(r=>r.signal).map((r,i)=>(
         <div key={i} style={{padding:"10px 0",borderBottom:"1px solid #f2f2f7",fontSize:14}}>
           <span style={{fontWeight:600,color:"#e8912e"}}>IF</span>{" "}{r.signal}{" "}<span style={{fontWeight:600,color:"#34c759"}}>→</span>{" "}{r.response}
